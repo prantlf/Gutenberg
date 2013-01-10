@@ -1,0 +1,124 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+
+<!-- Copyright (C) 2012 Ferdinand Prantl <prantlf@gmail.com>                  -->
+<!-- All rights reserved.                                                     -->
+<!--                                                                          -->
+<!-- This file is part of GutenPosh - PowerShell drive for Gutenberg project  -->
+<!--                                                                          -->
+<!-- This program is free software: you can redistribute it and/or modify     -->
+<!-- it under the terms of the GNU General Public License as published by     -->
+<!-- the Free Software Foundation, either version 3 of the License, or        -->
+<!-- (at your option) any later version.                                      -->
+<!--                                                                          -->
+<!-- This program is distributed in the hope that it will be useful,          -->
+<!-- but WITHOUT ANY WARRANTY; without even the implied warranty of           -->
+<!-- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            -->
+<!-- GNU General Public License for more details.                             -->
+<!--                                                                          -->
+<!-- You should have received a copy of the GNU General Public License        -->
+<!-- along with this program.  If not, see <http://www.gnu.org/licenses/>.    -->
+
+<Configuration>
+  <SelectionSets>
+    <SelectionSet>
+      <Name>GutenPoshTypes</Name>
+      <Types>
+        <TypeName>GutenPosh.Book</TypeName>
+      </Types>
+    </SelectionSet>
+  </SelectionSets>
+
+  <ViewDefinitions>
+    <View>
+      <Name>children</Name>
+      <ViewSelectedBy>
+        <SelectionSetName>GutenPoshTypes</SelectionSetName>
+      </ViewSelectedBy>
+      <TableControl>
+        <TableHeaders>
+          <TableColumnHeader>
+            <Label>Number</Label>
+            <Width>6</Width>
+            <Alignment>right</Alignment>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>Title and Author</Label>
+            <Width>72</Width>
+            <Alignment>left</Alignment>
+          </TableColumnHeader>
+        </TableHeaders>
+        <TableRowEntries>
+          <TableRowEntry>
+            <Wrap/>
+            <TableColumnItems>
+              <TableColumnItem>
+                <PropertyName>Number</PropertyName>
+              </TableColumnItem>
+              <TableColumnItem>
+                <PropertyName>FriendlyTitle</PropertyName>
+              </TableColumnItem>
+            </TableColumnItems>
+          </TableRowEntry>
+        </TableRowEntries>
+      </TableControl>
+    </View>
+    
+    <View>
+      <Name>children</Name>
+      <ViewSelectedBy>
+        <SelectionSetName>GutenPoshTypes</SelectionSetName>
+      </ViewSelectedBy>
+      <ListControl>
+        <ListEntries>
+          <ListEntry>
+            <ListItems>
+              <ListItem>
+                <PropertyName>Number</PropertyName>
+              </ListItem>
+              <ListItem>
+                <PropertyName>Title</PropertyName>
+              </ListItem>
+              <ListItem>
+                <PropertyName>Authors</PropertyName>
+              </ListItem>
+              <ListItem>
+                <PropertyName>Contributors</PropertyName>
+              </ListItem>
+              <ListItem>
+                <PropertyName>Notes</PropertyName>
+              </ListItem>
+              <ListItem>
+                <PropertyName>Tags</PropertyName>
+              </ListItem>
+              <ListItem>
+                <PropertyName>Language</PropertyName>
+              </ListItem>
+              <ListItem>
+                <PropertyName>Formats</PropertyName>
+              </ListItem>
+              <ListItem>
+                <PropertyName>Included</PropertyName>
+              </ListItem>
+            </ListItems>
+          </ListEntry>
+        </ListEntries>
+      </ListControl>
+    </View>
+    
+    <View>
+      <Name>children</Name>
+      <ViewSelectedBy>
+        <SelectionSetName>GutenPoshTypes</SelectionSetName>
+      </ViewSelectedBy>
+      <WideControl>
+        <WideEntries>
+          <WideEntry>
+            <WideItem>
+              <PropertyName>PSChildName</PropertyName>
+            </WideItem>
+          </WideEntry>
+        </WideEntries>
+      </WideControl>
+    </View>
+  </ViewDefinitions>
+</Configuration>

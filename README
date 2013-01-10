@@ -10,7 +10,7 @@ DESCRIPTION
   catalogue and a set of cmdlets performing related tasks. The provider offers
   the Gutenberg drive supporting navigation among the books from the catalogue
   using their meta-data for searching and browsing criteria. Reading of both
-  the meta-data anbd content of the books is supported. The drive uses locally
+  the meta-data and content of the books is supported. The drive uses locally
   cached copy of the catalogue and the book content is retrieved on-demand
   from the project web site.
 
