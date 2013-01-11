@@ -53,6 +53,11 @@ namespace GutenPosh
                 progress.Continue("Opening local catalogue...");
                 localDate = books.GetCreated();
                 Log.Verbose("Local creation date: {0}.", localDate);
+                if (new Date(DateTime.Now) == localDate) {
+                    WriteWarning("Local catalogue up-to-date.");
+                    progress.Finish();
+                    return;
+                }
             }
             progress.Continue("Downloading remote catalogue...");
             var catalogue = new Catalogue { Log = Log };
