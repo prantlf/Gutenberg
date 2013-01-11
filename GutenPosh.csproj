@@ -51,6 +51,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Command\ConvertToBytes.cs" />
+    <Compile Include="Command\ClearCache.cs" />
     <Compile Include="Source\Cache.cs" />
     <Compile Include="Source\Catalogue.cs" />
     <Compile Include="Command\LoggingCmdlet.cs" />

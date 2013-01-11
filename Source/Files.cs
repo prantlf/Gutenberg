@@ -53,7 +53,7 @@ namespace GutenPosh
             }
         }
 
-        public void CleanCache() {
+        public void ClearCache() {
             foreach (var directory in Directory.GetDirectories(DirectoryName))
                 Directory.Delete(directory, true);
         }
