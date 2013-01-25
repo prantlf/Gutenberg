@@ -1,0 +1,51 @@
+NAME
+  GutenPosh 1.0 - SharePoint drive for the Project Gutenberg catalog
+
+SYNOPSIS
+  PowerShell module to make the Project Gutenberg catalog browsable in the
+  same way as you work with the local file system.
+
+DESCRIPTION
+  GutenPosh consists of a PowerShell drive provider for the Project Gutenberg
+  catalog and a set of cmdlets performing related tasks. The provider offers
+  the Gutenberg drive supporting navigation among the books from the catalog
+  using their meta-data for searching and browsing criteria. Reading of both
+  the meta-data and content of the books is supported. The drive uses locally
+  cached copy of the catalog and the book content is retrieved on-demand
+  from the project web site.
+
+REQUIREMENTS
+  This module runs on PowerShell 2.0 at least. PowerShell 3.0 is recommended
+  because it fixes tab-completion problems. Minimum version of the Microsoft
+  .NET Framework is 3.5.
+
+INSTALLATION
+  Building the project will produce a folder GutenPosh in bin/Debug or
+  bin/Release according to your configuration selection. Copy this folder
+  either to %USERPROFILE%\Documents\WindowsPowerShell\Modules\ or to
+  %WINDIR%\System32\WindowsPowerShell\v1.0\Modules\ depending on if you want
+  to use the module privately or share it with other users on your machine.
+  If you copy the folder to other path make sure that it is included in the
+  environment variable PSModulePath.
+
+USAGE
+  Load the GutenPosh module in your PowerShell console by the command
+  Import-Module GutenPosh. List the available cmdlets by the command
+  Get-Command -Module GutenPosh. Read the help about the PowerShell drive
+  provider for the Project Gutenberg by the command Get-Help GutenPosh.
+
+SOURCE
+  Root directory contains control files for the Visual Studio project and
+  basic description of the content with the license. Other directories:
+    Command        - cmdlets and their base classes
+    Module         - PowerShell module descriptor, type formatters, help and
+                     other module-related files
+    Properties     - assembly information and default connectoin settings
+    Provider       - the drive provider itself with information, dynamic
+                     parameters and content reader classes
+
+AUTHOR
+  Ferdinand Prantl <prantlf@gmail.com>
+
+LICENSE
+  GPL (See the enclosed LICENSE file.) 

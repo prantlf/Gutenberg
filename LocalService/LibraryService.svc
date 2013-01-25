@@ -1,0 +1,1 @@
+﻿<%@ ServiceHost Language="C#" Debug="true" Service="Gutenberg.LocalService.LibraryService" CodeBehind="LibraryService.svc.cs" %>
