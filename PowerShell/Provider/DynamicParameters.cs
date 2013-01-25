@@ -24,6 +24,12 @@ using Microsoft.PowerShell.Commands;
 
 namespace Gutenberg.PowerShell
 {
+    public class NewDriveParameters
+    {
+        [Parameter]
+        public string Directory { get; set; }
+    }
+
     // Extra parameters for the Get-Content cmdlet. They can specify encoding of the binary
     // content or raw binary processing in the same way as it is done in the file system
     // drive provider.

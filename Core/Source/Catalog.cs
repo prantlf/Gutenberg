@@ -58,7 +58,7 @@ namespace Gutenberg
         protected override string Url {
             get { return url; }
         }
-        string url = "http://www.gutenberg.org/feeds/catalog.rdf.zip";
+        string url = Settings.GetValue<string>(typeof(Catalog), "CatalogURL");
 
         public void SetUrl(string value) {
             url = value;

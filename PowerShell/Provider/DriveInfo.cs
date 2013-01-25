@@ -23,12 +23,12 @@ namespace Gutenberg.PowerShell
 {
     public class DriveInfo : PSDriveInfo
     {
-        public DriveInfo(PSDriveInfo driveInfo) : base(driveInfo) {
-            EnsureDescription();
-        }
+        public string Directory { get; private set; }
 
-        public DriveInfo(string name, ProviderInfo provider, string root, string description,
-            PSCredential credential) : base (name, provider, root, description, credential) {
+        public DriveInfo(PSDriveInfo driveInfo, NewDriveParameters parameters) : base(driveInfo) {
+            if (parameters != null)
+                Directory = parameters.Directory;
+            EnsureDescription();
         }
 
         void EnsureDescription() {
@@ -42,10 +42,15 @@ namespace Gutenberg.PowerShell
         }
         Cache cache;
 
-        internal static Cache CreateCache() {
-            return new Cache() {
+        Cache CreateCache() {
+            var cache = new Cache() {
                 BookSource = new BookSource(), VolumeSource = new VolumeSource()
             };
+            if (!string.IsNullOrEmpty(Directory)) {
+                ((BookSource) cache.BookSource).SetDirectory(Directory);
+                ((VolumeSource) cache.VolumeSource).SetDirectory(Directory);
+            }
+            return cache;
         }
     }
 }

@@ -111,6 +111,12 @@
       </FlavorProperties>
     </VisualStudio>
   </ProjectExtensions>
+  <PropertyGroup>
+    <PostBuildEvent>xcopy /y/i "$(SolutionDir)Core\$(OutDir)$(ConfigurationName)\Gutenberg.dll.config" "$(TargetDir)"
+xcopy /y/i "$(SolutionDir)FileSystem\$(OutDir)$(ConfigurationName)\Gutenberg.FileSystem.dll.config" "$(TargetDir)"
+
+</PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

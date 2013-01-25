@@ -41,6 +41,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml" />
@@ -57,12 +58,14 @@
     <Compile Include="Source\Library.cs" />
     <Compile Include="Source\RemoteSource.cs" />
     <Compile Include="Utility\ConfigurableComparer.cs" />
+    <Compile Include="Utility\Settings.cs" />
     <Compile Include="Utility\Date.cs" />
     <Compile Include="Utility\Log.cs" />
     <Compile Include="Utility\PathUtility.cs" />
     <Compile Include="Utility\SerializationUtility.cs" />
     <Compile Include="Utility\YearSpan.cs" />
     <Compile Include="Utility\ZipStorer.cs" />
+    <None Include="app.config" />
     <None Include="LICENSE" />
     <Compile Include="Extension\Extensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

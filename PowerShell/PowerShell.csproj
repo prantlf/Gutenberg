@@ -51,6 +51,7 @@
   <ItemGroup>
     <Compile Include="Command\ConvertToBytes.cs" />
     <Compile Include="Command\ClearCache.cs" />
+    <Compile Include="Command\DriveCmdlet.cs" />
     <Compile Include="Command\LoggingCmdlet.cs" />
     <Compile Include="Command\UpdateCatalog.cs" />
     <Compile Include="Utility\Log.cs" />
@@ -90,7 +91,9 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>xcopy /y/i "$(TargetDir)Gutenberg.dll" "$(TargetDir)GutenPosh\"
+xcopy /y/i "$(SolutionDir)Core\$(OutDir)Gutenberg.dll.config" "$(TargetDir)GutenPosh\"
 xcopy /y/i "$(TargetDir)Gutenberg.FileSystem.dll" "$(TargetDir)GutenPosh\"
+xcopy /y/i "$(SolutionDir)FileSystem\$(OutDir)Gutenberg.FileSystem.dll.config" "$(TargetDir)GutenPosh\"
 xcopy /y/i "$(TargetDir)Gutenberg.PowerShell.dll" "$(TargetDir)GutenPosh\"
 xcopy /y/i "$(ProjectDir)Module\GutenPosh.psd1" "$(TargetDir)GutenPosh"
 xcopy /y/i "$(ProjectDir)Module\GutenPosh.format.ps1xml" "$(TargetDir)GutenPosh"

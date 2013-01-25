@@ -47,12 +47,16 @@ namespace Gutenberg.PowerShell
         protected override PSDriveInfo NewDrive(PSDriveInfo drive) {
             if (drive == null)
                 throw new ArgumentNullException("drive");
-            var newDrive = new DriveInfo(drive);
+            var newDrive = new DriveInfo(drive, (NewDriveParameters) DynamicParameters);
             newDrive.Cache.Log = new DriveLog(this);
             if (!newDrive.Cache.HasLibrary)
                 WriteWarning("There is no catalog available. Before accessing the Gutenberg " +
                     "drive create the local catalog copy by the Update-GPCatalog command.");
             return newDrive;
+        }
+
+        protected override object NewDriveDynamicParameters() {
+            return new NewDriveParameters();
         }
 
         protected override ProviderInfo Start(ProviderInfo providerInfo) {
@@ -257,15 +261,7 @@ namespace Gutenberg.PowerShell
         }
 
         Cache Cache {
-            get {
-                if (!synchronized && DriveInfo != null) {
-                    cache = DriveInfo.Cache;
-                    synchronized = true;
-                }
-                return cache ?? (cache = DriveInfo.CreateCache());
-            }
+            get { return DriveInfo.Cache; }
         }
-        Cache cache;
-        bool synchronized;
     }
 }

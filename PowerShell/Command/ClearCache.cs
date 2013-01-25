@@ -23,7 +23,7 @@ using Gutenberg.FileSystem;
 namespace Gutenberg.PowerShell
 {
     [Cmdlet(VerbsCommon.Clear, "GPCache", SupportsShouldProcess = true)]
-    public class ClearCache : LoggingCmdlet
+    public class ClearCache : DriveCmdlet
     {
         [Parameter]
         public SwitchParameter Force { get; set; }
@@ -31,6 +31,8 @@ namespace Gutenberg.PowerShell
         protected override void ProcessRecord() {
             try {
                 var files = new FileSource { Log = Log };
+                if (!string.IsNullOrEmpty(ActualDirectory))
+                    files.SetDirectory(ActualDirectory);
                 if (ShouldProcess("Cache", "Clear") && (Force ||
                         ShouldContinue("Do you really want to clear locally cached volumes?",
                             "Clear Cache")))

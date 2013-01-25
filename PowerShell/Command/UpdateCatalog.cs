@@ -25,7 +25,7 @@ using Gutenberg.FileSystem;
 namespace Gutenberg.PowerShell
 {
     [Cmdlet(VerbsData.Update, "GPCatalog", SupportsShouldProcess = true)]
-    public class UpdateCatalog : LoggingCmdlet
+    public class UpdateCatalog : DriveCmdlet
     {
         [Parameter]
         public SwitchParameter Force { get; set; }
@@ -35,9 +35,6 @@ namespace Gutenberg.PowerShell
 
         [Parameter]
         public string URL { get; set; }
-
-        [Parameter]
-        public string Directory { get; set; }
 
         protected override void ProcessRecord() {
             try {
@@ -52,9 +49,9 @@ namespace Gutenberg.PowerShell
             var progress = Log.Action(5, "Catalog Update");
             var books = new BookSource { Log = Log };
             var volumes = new VolumeSource { Log = Log };
-            if (!string.IsNullOrEmpty(Directory)) {
-                books.SetDirectory(Directory);
-                volumes.SetDirectory(Directory);
+            if (!string.IsNullOrEmpty(ActualDirectory)) {
+                books.SetDirectory(ActualDirectory);
+                volumes.SetDirectory(ActualDirectory);
             }
             Date localDate = Date.MinValue;
             if (!Always && books.Exists && volumes.Exists) {

@@ -237,6 +237,8 @@ namespace Gutenberg
         }
 
         const string RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
-        public const string ProjectUrl = "http://www.gutenberg.org/";
+
+        public static readonly string ProjectUrl = Settings.GetValue<string>(
+                                                        typeof(CatalogParser), "ProjectURL");
     }
 }

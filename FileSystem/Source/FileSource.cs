@@ -1,7 +1,7 @@
 ﻿// Copyright (C) 2012-2013 Ferdinand Prantl <prantlf@gmail.com>
 // All rights reserved.       
 //
-// This file is part of the Project Gutenberg Access API
+// This file is part of the Project Gutenberg Access from Local File System
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
