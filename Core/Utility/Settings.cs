@@ -29,8 +29,11 @@ namespace Gutenberg
             var value = ConfigurationManager.AppSettings[fullName];
             if (string.IsNullOrEmpty(value)) {
                 var configuration = GetConfiguration(type);
-                if (configuration != null)
-                    value = configuration.AppSettings.Settings[name].Value;
+                if (configuration != null) {
+                    var element = configuration.AppSettings.Settings[name];
+                    if (element != null)
+                        value = element.Value;
+                }
             }
             if (string.IsNullOrEmpty(value))
                 throw new ApplicationException(string.Format("Value of {0} was empty.", fullName));
