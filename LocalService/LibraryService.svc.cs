@@ -56,8 +56,40 @@ namespace Gutenberg.LocalService
             Log.Verbose("Enumerating books starting after {0}.", lastNumberSeen);
             var books = Books;
             if (lastNumberSeen != 0)
-                books = books.SkipWhile(book => lastNumberSeen != book.Number).Skip(1);
+                books = books.SkipWhile(book => book.Number <= lastNumberSeen);
             return books.Take(100).Select(book => book.ToCard()).ToArray();
+        }
+
+        public Book[] FindBooks(Filter filter, int start, int count) {
+            var books = Cache.Books;
+            if (filter != null) {
+                if (!string.IsNullOrEmpty(filter.Title))
+                    books = books.Where(book => !string.IsNullOrEmpty(book.Title) &&
+                                    book.Title.LikeCI(filter.Title));
+                if (!string.IsNullOrEmpty(filter.Author))
+                    books = books.Where(book => book.Authors != null &&
+                        book.Authors.Any(name => name.LikeCI(filter.Author)));
+                if (!string.IsNullOrEmpty(filter.Contributor))
+                    books = books.Where(book => book.Contributors != null &&
+                        book.Contributors.Any(name => name.LikeCI(filter.Contributor)));
+                if (!string.IsNullOrEmpty(filter.Language))
+                    books = books.Where(book => !string.IsNullOrEmpty(book.Language) &&
+                                    book.Language.LikeII(filter.Language));
+                if (!string.IsNullOrEmpty(filter.Format))
+                    books = books.Where(book => book.Formats != null &&
+                        book.Formats.Any(format => format.LikeII(filter.Format)));
+                if (!string.IsNullOrEmpty(filter.Note))
+                    books = books.Where(book => book.Notes != null &&
+                        book.Notes.Any(note => note.LikeCI(filter.Note)));
+                if (!string.IsNullOrEmpty(filter.Tag))
+                    books = books.Where(book => book.Tags != null &&
+                        book.Tags.Any(tag => tag.LikeCI(filter.Tag)));
+                if (!string.IsNullOrEmpty(filter.Era)) {
+                    var era = YearSpan.Parse(filter.Era);
+                    books = books.Where(book => !book.Era.IsEmpty && !era.Intersects(book.Era));
+                }
+            }
+            return books.Skip(start).Take(count).Select(book => book.ToBook()).ToArray();
         }
 
         Gutenberg.Book OpenBook(int number) {
@@ -72,33 +104,11 @@ namespace Gutenberg.LocalService
             return files.Open(volume, ref encoding);
         }
 
-        //public Book[] FindBooks(Filter filter, int start, int count) {
-        //    if (start < 0 || start > Cache.Books.Count())
-        //        throw new ArgumentOutOfRangeException("start");
-        //    if (count < 0)
-        //        throw new ArgumentOutOfRangeException("count");
-        //    var books = Cache.Books;
-        //    if (filter != null) {
-        //        if (!string.IsNullOrEmpty(filter.Title))
-        //            books = books.Where(book => !string.IsNullOrEmpty(book.Title) &&
-        //                            book.Title.LikeCI(filter.Title));
-        //        if (!string.IsNullOrEmpty(filter.Author))
-        //            books = books.Where(book => book.Authors != null &&
-        //                book.Authors.Any(author => author.LikeCI(filter.Author)));
-        //        if (!string.IsNullOrEmpty(filter.Language))
-        //            books = books.Where(book => !string.IsNullOrEmpty(book.Language) &&
-        //                            book.Language.LikeII(filter.Language));
-        //        if (!string.IsNullOrEmpty(filter.Format))
-        //            books = books.Where(book => book.Formats != null &&
-        //                book.Formats.Any(author => author.LikeII(filter.Format)));
-        //    }
-        //    return books.Skip(start).Take(count).Select(book => Book.Create(book)).ToArray();
-        //}
-
         IEnumerable<Gutenberg.Book> Books {
             get {
                 return Cache.Books.Where(book => book.Formats != null &&
-                    book.Formats.Any(format => format.StartsWithII(Extensions.MimeType)));
+                    book.Formats.Any(format => format.StartsWithII(Extensions.MimeType))).
+                    OrderBy(book => book.Number);
             }
         }
 

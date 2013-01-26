@@ -17,7 +17,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization;
 using System.ServiceModel;
@@ -42,8 +41,36 @@ namespace Gutenberg.LocalService
         [OperationContract]
         Card[] EnumerateCards(int lastNumberSeen);
 
-        //[OperationContract]
-        //Book[] FindBooks(Filter filter, int start, int count);
+        [OperationContract]
+        Book[] FindBooks(Filter filter, int start, int count);
+    }
+
+    [DataContract]
+    public class Filter
+    {
+        [DataMember(IsRequired = true)]
+        public string Title { get; set; }
+
+        [DataMember(IsRequired = true)]
+        public string Author { get; set; }
+
+        [DataMember(IsRequired = true)]
+        public string Contributor { get; set; }
+
+        [DataMember(IsRequired = true)]
+        public string Era { get; set; }
+
+        [DataMember(IsRequired = true)]
+        public string Language { get; set; }
+
+        [DataMember(IsRequired = true)]
+        public string Format { get; set; }
+
+        [DataMember(IsRequired = true)]
+        public string Note { get; set; }
+
+        [DataMember(IsRequired = true)]
+        public string Tag { get; set; }
     }
 
     [DataContract]
@@ -131,110 +158,25 @@ namespace Gutenberg.LocalService
             return new Book {
                 Number = book.Number, Title = book.Title, MimeType = MimeType,
                 Language = book.Language, LastModified = new DateTime(volume.Uploaded.Ticks),
-                Size = volume.Size, FileName = book.FriendlyTitle + ".txt",
+                Size = volume.Size, FileName = book.GetFileName(), Era = book.Era.ToString(),
                 Author = book.Authors == null ? null : string.Join(", ", book.Authors),
                 Contributor = book.Contributors == null ? null :
                                     string.Join(", ", book.Contributors),
                 Notes = book.Notes == null ? null : string.Join("\r\n", book.Notes),
                 Tags = book.Tags == null ? null : string.Join("\r\n", book.Tags),
-                Downloads = book.Downloads, Included = new DateTime(book.Included.Ticks),
-                Era = book.Era.ToString()
+                Downloads = book.Downloads, Included = new DateTime(book.Included.Ticks)
             };
         }
 
         public static Volume ToVolume(this Gutenberg.Book book, byte[] content) {
             return new Volume {
-                MimeType = MimeType, FileName = book.FriendlyTitle + ".txt", Content = content
+                MimeType = MimeType, FileName = book.GetFileName(), Content = content
             };
         }
+
+        static string GetFileName(this Gutenberg.Book book) {
+            return book.FriendlyTitle.Replace("\r\n", " - ").Replace("\n", " - ").
+                                            Replace("\r", " - ") + ".txt";
+        }
     }
-
-    //[DataContract]
-    //public class Filter
-    //{
-    //    [DataMember(IsRequired = true)]
-    //    public string Title { get; set; }
-
-    //    [DataMember(IsRequired = true)]
-    //    public string Author { get; set; }
-
-    //    [DataMember(IsRequired = true)]
-    //    public string Language { get; set; }
-
-    //    [DataMember(IsRequired = true)]
-    //    public string Format { get; set; }
-    //}
-
-    //[DataContract]
-    //public class Book
-    //{
-    //    [DataMember(IsRequired = true)]
-    //    public int Number { get; set; }
-
-    //    [DataMember(IsRequired = true)]
-    //    public string Title { get; set; }
-
-    //    [DataMember(IsRequired = true)]
-    //    public string[] Authors { get; set; }
-
-    //    [DataMember(IsRequired = true)]
-    //    public string[] Contributors { get; set; }
-
-    //    [DataMember(IsRequired = true)]
-    //    public YearSpan Era { get; set; }
-
-    //    [DataMember(IsRequired = true)]
-    //    public string Language { get; set; }
-
-    //    [DataMember(IsRequired = true)]
-    //    public string[] Notes { get; set; }
-
-    //    [DataMember(IsRequired = true)]
-    //    public string[] Tags { get; set; }
-
-    //    [DataMember(IsRequired = true)]
-    //    public Date Included { get; set; }
-
-    //    [DataMember(IsRequired = true)]
-    //    public int Downloads { get; set; }
-
-    //    [DataMember(IsRequired = true)]
-    //    public Volume[] Volumes { get; set; }
-
-    //    internal static Book Create(Gutenberg.Book book) {
-    //        return new Book {
-    //            Number = book.Number, Title = book.Title, Authors = book.Authors,
-    //            Contributors = book.Contributors, Era = book.Era, Language = book.Language,
-    //            Notes = book.Notes, Tags = book.Tags, Included = book.Included,
-    //            Downloads = book.Downloads, Volumes = book.Volumes == null ? null :
-    //                book.Volumes.Select(volume => Volume.Create(volume)).ToArray()
-    //        };
-    //    }
-    //}
-
-    //[DataContract]
-    //public class Volume
-    //{
-    //    [DataMember(IsRequired = true)]
-    //    public int Number { get; set; }
-
-    //    [DataMember(IsRequired = true)]
-    //    public string URL { get; set; }
-
-    //    [DataMember(IsRequired = true)]
-    //    public string[] Formats { get; set; }
-
-    //    [DataMember(IsRequired = true)]
-    //    public Date Uploaded { get; set; }
-
-    //    [DataMember(IsRequired = true)]
-    //    public int Size { get; set; }
-
-    //    internal static Volume Create(Gutenberg.Volume volume) {
-    //        return new Volume {
-    //            Number = volume.Number, URL = volume.URL, Formats = volume.Formats,
-    //            Uploaded = volume.Uploaded, Size = volume.Size
-    //        };
-    //    }
-    //}
 }
