@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Management.Automation;
 using System.Text;
 using System.Xml;
 
@@ -91,6 +92,31 @@ namespace Gutenberg
 
         public static int IndexOfII(this string hay, string needle) {
             return hay.IndexOf(needle, StringComparison.InvariantCultureIgnoreCase);
+        }
+
+        public static bool Like(this string hay, string needle) {
+            if (WildcardPattern.ContainsWildcardCharacters(needle)) {
+                var pattern = new WildcardPattern(needle, WildcardOptions.None);
+                return pattern.IsMatch(hay);
+            }
+            return hay.Contains(needle);
+        }
+
+        public static bool LikeCI(this string hay, string needle) {
+            if (WildcardPattern.ContainsWildcardCharacters(needle)) {
+                var pattern = new WildcardPattern(needle, WildcardOptions.IgnoreCase);
+                return pattern.IsMatch(hay);
+            }
+            return hay.ContainsCI(needle);
+        }
+
+        public static bool LikeII(this string hay, string needle) {
+            if (WildcardPattern.ContainsWildcardCharacters(needle)) {
+                var pattern = new WildcardPattern(needle, WildcardOptions.IgnoreCase |
+                WildcardOptions.CultureInvariant);
+                return pattern.IsMatch(hay);
+            }
+            return hay.ContainsII(needle);
         }
     }
 

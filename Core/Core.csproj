@@ -44,6 +44,7 @@
     <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Management.Automation" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
