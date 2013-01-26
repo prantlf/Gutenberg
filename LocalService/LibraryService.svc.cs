@@ -26,7 +26,8 @@ using Gutenberg.FileSystem;
 
 namespace Gutenberg.LocalService
 {
-    [AspNetCompatibilityRequirements(RequirementsMode = AspNetCompatibilityRequirementsMode.Allowed)]
+    [AspNetCompatibilityRequirements(RequirementsMode =
+        AspNetCompatibilityRequirementsMode.Allowed)]
     public class LibraryService : Library
     {
         public Book GetBook(int number) {
@@ -113,20 +114,30 @@ namespace Gutenberg.LocalService
         }
 
         static Cache Cache {
-            get { return cache ?? (cache = CreateCache()); }
+            get {
+                if (cache == null)
+                    lock (cacheLock)
+                        if (cache == null)
+                            cache = new Cache() {
+                                BookSource = new BookSource { Log = Log },
+                                VolumeSource = new VolumeSource { Log = Log }, Log = Log
+                            };
+                return cache;
+            }
         }
         static Cache cache;
-
-        internal static Cache CreateCache() {
-            return new Cache() {
-                BookSource = new BookSource { Log = Log },
-                VolumeSource = new VolumeSource { Log = Log }, Log = Log
-            };
-        }
+        static object cacheLock = new object();
 
         static Log Log {
-            get { return log ?? (log = new DebugLog()); }
+            get {
+                if (log == null)
+                    lock (logLock)
+                        if (log == null)
+                            log = new DebugLog();
+                return log;
+            }
         }
         static Log log;
+        static Log logLock;
     }
 }
