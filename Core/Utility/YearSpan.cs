@@ -100,14 +100,22 @@ namespace Gutenberg
             return Includes(time.Year);
         }
 
-        public YearSpan Union(YearSpan other) {
-            return IsEmpty ? other : other.IsEmpty ? this :
-                new YearSpan(Math.Min(First, other.First), Math.Max(Last, other.Last));
+        public bool Includes(YearSpan other) {
+            return IsEmpty ? other.IsEmpty : First <= other.First && Last >= other.Last;
+        }
+
+        public bool Intersects(YearSpan other) {
+            return IsEmpty ? other.IsEmpty : Last >= other.First && First <= other.Last;
         }
 
         public YearSpan Intersection(YearSpan other) {
             return IsEmpty || other.IsEmpty || Last < other.First || First < other.Last ? Empty :
                 new YearSpan(Math.Max(First, other.First), Math.Min(Last, other.Last));
+        }
+
+        public YearSpan Union(YearSpan other) {
+            return IsEmpty ? other : other.IsEmpty ? this :
+                new YearSpan(Math.Min(First, other.First), Math.Max(Last, other.Last));
         }
 
         public override string ToString() {
