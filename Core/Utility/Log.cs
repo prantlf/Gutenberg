@@ -17,6 +17,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using System;
+using Debugger = System.Diagnostics.Debugger;
 
 namespace Gutenberg
 {
@@ -129,6 +130,28 @@ namespace Gutenberg
 
         public abstract void Progress(int number, string name, bool last, int percent,
                                       string message);
+    }
+
+    public class DebugLog : ProgressiveLog
+    {
+        public override void Verbose(string message) {
+            Debugger.Log(Trace, null, message);
+        }
+
+        public override void Warning(string message) {
+            Debugger.Log(Warn, null, message);
+        }
+
+        public override void Progress(int number, string name, bool last, int percent,
+                                      string message) {
+            if (percent == 0)
+                Debugger.Log(Status, null, string.Format("{0}: {1}", number, name));
+            Debugger.Log(Status, null, string.Format("{0}:   {1} {2}%", number, message, percent));
+        }
+
+        const int Trace = 0;
+        const int Status = 20;
+        const int Warn = 40;
     }
 
     public abstract class SteppedProgress : Progress
