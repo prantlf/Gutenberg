@@ -53,14 +53,12 @@ namespace Gutenberg.PowerShell
 
     public abstract class DriveCmdlet : LoggingCmdlet
     {
-        [Parameter(ParameterSetName = "ImplicitDirectorySpecification",
-            HelpMessage = "GutenPosh drive. " +
-                "Provide an instance returned by Get-PSProvider or just its name.")]
+        [Parameter(HelpMessage = "GutenPosh drive. Provide an instance returned by " +
+                                 "Get-PSProvider or just its name.")]
         public DrivePipeInput Drive { get; set; }
 
-        [Parameter(ParameterSetName = "ExplicitDirectorySpecification",
-            HelpMessage = "Cache directory of GutenPosh drives. " +
-                "The default value is %LOCALAPPDATA%\\Gutenberg.")]
+        [Parameter(HelpMessage = "Cache directory of GutenPosh drives. " +
+                                 "The default value is %LOCALAPPDATA%\\Gutenberg.")]
         public string Directory { get; set; }
 
         protected string ActualDirectory {
