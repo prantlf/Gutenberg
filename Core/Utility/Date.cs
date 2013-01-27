@@ -57,6 +57,14 @@ namespace Gutenberg
 
         public static Date Today { get { return new Date(DateTime.Now); } }
 
+        public static Date Min(Date left, Date right) {
+            return left < right ? left : right;
+        }
+
+        public static Date Max(Date left, Date right) {
+            return left > right ? left : right;
+        }
+
         public static readonly Date MinValue = new Date(DateTime.MinValue.Date);
 
         public static readonly Date MaxValue = new Date(DateTime.MaxValue.Date);
