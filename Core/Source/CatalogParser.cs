@@ -218,24 +218,6 @@ namespace Gutenberg
             return url;
         }
 
-        Stream OpenUnpacked(string path) {
-            Log.Verbose("Opening {0}...", path);
-            if (ZipStorer.IsZip(path))
-                using (var store = ZipStorer.Open(path, FileAccess.Read)) {
-                    var entry = store.ReadCentralDir().First();
-                    Log.Verbose("Extracting {0}...", entry.FilenameInZip);
-                    var content = new MemoryStream();
-                    if (!store.ExtractStream(entry, content)) {
-                        content.Dispose();
-                        throw new ApplicationException("Compression not supported.");
-                    }
-                    content.Position = 0;
-                    return content;
-                }
-            else
-                return File.OpenRead(path);
-        }
-
         const string RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
 
         public static readonly string ProjectUrl = Settings.GetValue<string>(

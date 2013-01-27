@@ -44,12 +44,23 @@ namespace Gutenberg
                     var entry = store.ReadCentralDir().First();
                     Log.Verbose("Extracting {0}...", entry.FilenameInZip);
                     var content = new MemoryStream();
-                    if (!store.ExtractStream(entry, content)) {
-                        content.Dispose();
-                        throw new ApplicationException("Compression not supported.");
+                    const int step = 65536, factor = 160;
+                    Progress progress = Log.Action((int) (entry.FileSize / (step * factor) + 2),
+                        "Extracting {0}...", entry.FilenameInZip);
+                    int count = 1;
+                    if (store.ExtractStream(entry, content, step, size => {
+                        if (count * step * factor <= size) {
+                            progress.Continue("{0} bytes extracted...", size);
+                            ++count;
+                        }
+                    })) {
+                        content.Position = 0;
+                        Log.Verbose("{0} bytes were extracted.", content.Length);
+                        progress.Finish();
+                        return content;
                     }
-                    content.Position = 0;
-                    return content;
+                    content.Dispose();
+                    throw new ApplicationException("Compression not supported.");
                 }
             stream.Position = 0;
             return stream;
