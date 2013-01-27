@@ -358,7 +358,8 @@ namespace Gutenberg
         /// <param name="_filename">Name of file to store uncompressed data</param>
         /// <returns>True if success, false if not.</returns>
         /// <remarks>Unique compression methods are Store and Deflate</remarks>
-        public bool ExtractFile(ZipFileEntry _zfe, string _filename)
+        public bool ExtractFile(ZipFileEntry _zfe, string _filename, int bufferSize = 65536,
+                                Action<uint> progress = null)
         {
             // Make sure the parent directory exist
             string path = System.IO.Path.GetDirectoryName(_filename);
@@ -370,7 +371,7 @@ namespace Gutenberg
                 return true;
 
             Stream output = new FileStream(_filename, FileMode.Create, FileAccess.Write);
-            bool result = ExtractStream(_zfe, output);
+            bool result = ExtractStream(_zfe, output, bufferSize, progress);
             if (result)
                 output.Close();
 
@@ -386,7 +387,8 @@ namespace Gutenberg
         /// <param name="_stream">Stream to store the uncompressed data</param>
         /// <returns>True if success, false if not.</returns>
         /// <remarks>Unique compression methods are Store and Deflate</remarks>
-        public bool ExtractStream(ZipFileEntry _zfe, Stream _stream)
+        public bool ExtractStream(ZipFileEntry _zfe, Stream _stream, int bufferSize = 65536,
+                                  Action<uint> progress = null)
         {
             if (!_stream.CanWrite)
                 throw new InvalidOperationException("Stream cannot be written");
@@ -408,7 +410,7 @@ namespace Gutenberg
                 return false;
 
             // Buffered copy
-            byte[] buffer = new byte[16384];
+            byte[] buffer = new byte[bufferSize];
             this.ZipFileStream.Seek(_zfe.FileOffset, SeekOrigin.Begin);
             uint bytesPending = _zfe.FileSize;
             while (bytesPending > 0)
@@ -416,6 +418,8 @@ namespace Gutenberg
                 int bytesRead = inStream.Read(buffer, 0, (int)Math.Min(bytesPending, buffer.Length));
                 _stream.Write(buffer, 0, bytesRead);
                 bytesPending -= (uint)bytesRead;
+                if (progress != null)
+                    progress(_zfe.FileSize - bytesPending);
             }
             _stream.Flush();
 
