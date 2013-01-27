@@ -17,6 +17,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using System;
+using System.Collections.Generic;
 using Debugger = System.Diagnostics.Debugger;
 
 namespace Gutenberg
@@ -134,6 +135,8 @@ namespace Gutenberg
 
     public class DebugLog : ProgressiveLog
     {
+        DebugLog() {}
+
         public override void Verbose(string message) {
             Debugger.Log(Trace, null, message);
         }
@@ -152,6 +155,37 @@ namespace Gutenberg
         const int Trace = 0;
         const int Status = 20;
         const int Warn = 40;
+
+        public static readonly Log Instance = new DebugLog();
+    }
+
+    public class DispatchLog : ProgressiveLog
+    {
+        public readonly List<Log> Logs = new List<Log>();
+
+        public DispatchLog() {}
+
+        public DispatchLog(IEnumerable<Log> logs) {
+            if (logs == null)
+                throw new ArgumentNullException("logs");
+            Logs.AddRange(logs);
+        }
+
+        public override void Verbose(string message) {
+            foreach (var log in Logs)
+                log.Verbose(message);
+        }
+
+        public override void Warning(string message) {
+            foreach (var log in Logs)
+                log.Warning(message);
+        }
+
+        public override void Progress(int number, string name, bool last, int percent,
+                                      string message) {
+            foreach (var log in Logs)
+                log.Progress(number, name, last, percent, message);
+        }
     }
 
     public abstract class SteppedProgress : Progress

@@ -26,7 +26,10 @@ namespace Gutenberg
     public abstract class LoggableBase : Loggable
     {
         public Log Log {
-            get { return log ?? DummyLog.Instance; }
+            get {
+                return log ?? (log = Settings.GetValue<bool>(typeof(Loggable), "DebugLog") ?
+                            DebugLog.Instance : DummyLog.Instance);
+            }
             set {
                 log = value;
                 UpdateLog();

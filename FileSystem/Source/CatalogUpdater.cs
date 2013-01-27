@@ -63,6 +63,9 @@ namespace Gutenberg.FileSystem
                         if (confirm()) {
                             books.Update(bookPath);
                             volumes.Update(volumePath);
+                            Log.Verbose("Local catalog updated.");
+                            progress.Finish();
+                            return true;
                         }
                     } finally {
                         if (bookPath != null)
@@ -70,9 +73,9 @@ namespace Gutenberg.FileSystem
                         if (volumePath != null)
                             IOUtility.DeleteTempFile(volumePath);
                     }
-                    Log.Verbose("Local catalog updated.");
+                    Log.Warning("Local catalog left intact.");
                     progress.Finish();
-                    return true;
+                    return false;
                 }
                 Log.Warning("Local catalog up-to-date.");
                 progress.Finish();

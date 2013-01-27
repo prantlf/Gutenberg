@@ -53,12 +53,12 @@
     <Compile Include="Source\CatalogParser.cs" />
     <Compile Include="Source\BinaryParser.cs" />
     <Compile Include="Source\BookParser.cs" />
-    <Compile Include="Source\Loggable.cs" />
     <Compile Include="Source\VolumeParser.cs" />
     <Compile Include="Source\LibraryParser.cs" />
     <Compile Include="Source\Library.cs" />
     <Compile Include="Source\RemoteSource.cs" />
     <Compile Include="Utility\ConfigurableComparer.cs" />
+    <Compile Include="Utility\Loggable.cs" />
     <Compile Include="Utility\Settings.cs" />
     <Compile Include="Utility\Date.cs" />
     <Compile Include="Utility\Log.cs" />

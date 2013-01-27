@@ -48,7 +48,7 @@ namespace Gutenberg.PowerShell
             if (drive == null)
                 throw new ArgumentNullException("drive");
             var newDrive = new DriveInfo(drive, (NewDriveParameters) DynamicParameters);
-            newDrive.Cache.Log = new DriveLog(this);
+            newDrive.Cache.Log = Log;
             if (!newDrive.Cache.HasLibrary)
                 WriteWarning("There is no catalog available. Before accessing the Gutenberg " +
                     "drive create the local catalog copy by the Update-GPCatalog command.");
@@ -257,8 +257,20 @@ namespace Gutenberg.PowerShell
         void EnsureLog() {
             var log = Cache.Log as DriveLog;
             if (log == null || log.Provider != this)
-                Cache.Log = new DriveLog(this);
+                Cache.Log = Log;
         }
+
+        Log Log {
+            get {
+                if (log == null) {
+                    log = new DriveLog(this);
+                    if (Settings.GetValue<bool>(typeof(Loggable), "DebugLog"))
+                        log = new DispatchLog(new[] { DebugLog.Instance, log });
+                }
+                return log;
+            }
+        }
+        Log log;
 
         Cache Cache {
             get { return DriveInfo.Cache; }

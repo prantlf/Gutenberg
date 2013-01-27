@@ -24,8 +24,16 @@ namespace Gutenberg.PowerShell
     public abstract class LoggingCmdlet : PSCmdlet
     {
         protected Log Log {
-            get { return log ?? (log = new CmdletLog(this)); }
+            get {
+                if (log == null) {
+                    log = new CmdletLog(this);
+                    if (Settings.GetValue<bool>(typeof(Loggable), "DebugLog"))
+                        log = new DispatchLog(new[] { DebugLog.Instance, log });
+                }
+                return log;
+            }
         }
         Log log;
+
     }
 }
