@@ -20,9 +20,8 @@ namespace Gutenberg.FileSystem
 {
     public abstract class LibrarySource : LocalSource
     {
-        public Date GetCreated() {
+        protected Date GetCreated(LibraryParser parser) {
             using (var stream = Open()) {
-                var parser = new BookParser { Log = Log };
                 Date created;
                 using (var reader = parser.Open(stream, out created))
                     return created;

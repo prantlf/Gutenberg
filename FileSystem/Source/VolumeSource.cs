@@ -24,6 +24,10 @@ namespace Gutenberg.FileSystem
 {
     public class VolumeSource : LibrarySource, Volumes
     {
+        public Date GetCreated() {
+            return GetCreated(new VolumeParser { Log = Log });
+        }
+
         public bool HasVolumes {
             get { return Exists; }
         }

@@ -24,6 +24,10 @@ namespace Gutenberg.FileSystem
 {
     public class BookSource : LibrarySource, Books
     {
+        public Date GetCreated() {
+            return GetCreated(new BookParser { Log = Log });
+        }
+
         public bool HasBooks {
             get { return Exists; }
         }
