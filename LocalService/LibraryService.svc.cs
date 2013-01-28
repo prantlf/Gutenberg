@@ -101,8 +101,8 @@ namespace Gutenberg.LocalService
             book = OpenBook(number);
             var volume = book.GetVolume(Extensions.MimeType);
             var files = new FileSource { Log = Log };
-            Encoding encoding = null;
-            return files.Open(volume, ref encoding);
+            Encoding encoding;
+            return files.Open(volume, out encoding);
         }
 
         IEnumerable<Gutenberg.Book> Books {

@@ -29,28 +29,15 @@ namespace Gutenberg.FileSystem
 {
     public class FileSource : PlacedSource
     {
-        public Stream Open(Volume volume, ref Encoding encoding) {
+        public Stream Open(Volume volume, out Encoding encoding) {
             if (volume == null)
                 throw new ArgumentNullException("volume");
             var path = GetPath(volume);
             if (!IsRecent(volume, path))
                 Download(volume, path);
             Log.Verbose("Opening {0}...", path);
-            Stream content = File.OpenRead(path);
-            try {
-                // If the encoding was not provided by the caller it will be inferred from the
-                // MIME type charset.
-                if (encoding == null)
-                    encoding = GetEncoding(volume);
-                // Books have a quite long common prolog and epilog with the Project Gutenberg
-                // policies. Trim it for plain text books; other formats would be too complicated.
-                if (volume.Formats.Any(format => format.StartsWithII("text/plain")))
-                    content = TrimTextPrologAndEpilog(content, encoding);
-                return content;
-            } catch {
-                content.Close();
-                throw;
-            }
+            encoding = GetEncoding(volume);
+            return File.OpenRead(path);
         }
 
         public void ClearCache() {
@@ -118,33 +105,6 @@ namespace Gutenberg.FileSystem
                 return Encoding.GetEncoding(charset);
             }
             return Encoding.Default;
-        }
-
-        // Reads all the content line by line and trims the standard Project Gutenberg prolog
-        // and epilog text off. It will set as content a new memory buffer with the lines left.
-        Stream TrimTextPrologAndEpilog(Stream content, Encoding encoding) {
-            Log.Verbose("Trimming project Gutenberg common prolog and epilog...");
-            IEnumerable<string> lines;
-            using (var reader = new StreamReader(content, encoding))
-                lines = reader.ReadLines().ToArray();
-            var trimmed = lines.SkipWhile(line => !(
-                line.ContainsCI("START OF THE PROJECT GUTENBERG EBOOK") ||
-                line.ContainsCI("START OF THIS PROJECT GUTENBERG EBOOK"))).ToArray();
-            if (trimmed.Any())
-                lines = trimmed.Skip(1).TakeWhile(line => !(
-                    line.ContainsCI("END OF THE PROJECT GUTENBERG EBOOK") ||
-                    line.ContainsCI("END OF THIS PROJECT GUTENBERG EBOOK"))).ToArray();
-            content.Close();
-            content = new MemoryStream();
-            try {
-                using (var writer = new StreamWriter(content, encoding))
-                    foreach (var line in lines)
-                        writer.WriteLine(line);
-                return new MemoryStream(((MemoryStream) content).ToArray());
-            } catch {
-                content.Close();
-                throw;
-            }
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿// Copyright (C) 2012-2013 Ferdinand Prantl <prantlf@gmail.com>
 // All rights reserved.       
 //
-// This file is part of PowerShell drive for the Project Gutenberg
+// This file is part of Project Gutenberg integration to PowerShell
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -42,9 +42,10 @@ namespace Gutenberg.PowerShell
                 identifier = parameters.Format;
             var volume = book.GetVolume(identifier);
             var files = new FileSource { Log = log };
-            Encoding encoding = parameters.WasStreamTypeSpecified ?
-                encoding = parameters.GetEncoding() : null;
-            Content = files.Open(volume, ref encoding);
+            Encoding encoding;
+            Content = files.Open(volume, out encoding);
+            if (parameters.WasStreamTypeSpecified)
+                encoding = parameters.GetEncoding();
             try {
                 if (!parameters.UsingByteEncoding)
                     Reader = new StreamReader(Content, encoding);
