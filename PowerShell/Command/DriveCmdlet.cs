@@ -1,7 +1,7 @@
 ﻿// Copyright (C) 2013 Ferdinand Prantl <prantlf@gmail.com>
 // All rights reserved.       
 //
-// This file is part of PowerShell drive for the Project Gutenberg
+// This file is part of Project Gutenberg integration to PowerShell
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@ using System.Management.Automation;
 
 namespace Gutenberg.PowerShell
 {
-    // Makes easier entering a GutenPosh drive as an input parameter for a cmdlet. Either a drive
+    // Makes easier entering a Gutenberg drive as an input parameter for a cmdlet. Either a drive
     // name or a DriveInfo object retrieved by Get-PSDrive are accepted.
     public class DrivePipeInput
     {
@@ -53,11 +53,11 @@ namespace Gutenberg.PowerShell
 
     public abstract class DriveCmdlet : LoggingCmdlet
     {
-        [Parameter(HelpMessage = "GutenPosh drive. Provide an instance returned by " +
+        [Parameter(HelpMessage = "Gutenberg drive. Provide an instance returned by " +
                                  "Get-PSProvider or just its name.")]
         public DrivePipeInput Drive { get; set; }
 
-        [Parameter(HelpMessage = "Cache directory of GutenPosh drives. " +
+        [Parameter(HelpMessage = "Cache directory of Gutenberg drives. " +
                                  "The default value is %LOCALAPPDATA%\\Gutenberg.")]
         public string Directory { get; set; }
 

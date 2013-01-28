@@ -1,12 +1,12 @@
 NAME
-  GutenPosh 1.0 - SharePoint drive for the Project Gutenberg catalog
+  Gutenberg 1.0 - PowerShell drive for the Project Gutenberg catalog
 
 SYNOPSIS
   PowerShell module to make the Project Gutenberg catalog browsable in the
   same way as you work with the local file system.
 
 DESCRIPTION
-  GutenPosh consists of a PowerShell drive provider for the Project Gutenberg
+  Gutenberg consists of a PowerShell drive provider for the Project Gutenberg
   catalog and a set of cmdlets performing related tasks. The provider offers
   the Gutenberg drive supporting navigation among the books from the catalog
   using their meta-data for searching and browsing criteria. Reading of both
@@ -20,7 +20,7 @@ REQUIREMENTS
   .NET Framework is 3.5.
 
 INSTALLATION
-  Building the project will produce a folder GutenPosh in bin/Debug or
+  Building the project will produce a folder Gutenberg in bin/Debug or
   bin/Release according to your configuration selection. Copy this folder
   either to %USERPROFILE%\Documents\WindowsPowerShell\Modules\ or to
   %WINDIR%\System32\WindowsPowerShell\v1.0\Modules\ depending on if you want
@@ -29,10 +29,10 @@ INSTALLATION
   environment variable PSModulePath.
 
 USAGE
-  Load the GutenPosh module in your PowerShell console by the command
-  Import-Module GutenPosh. List the available cmdlets by the command
-  Get-Command -Module GutenPosh. Read the help about the PowerShell drive
-  provider for the Project Gutenberg by the command Get-Help GutenPosh.
+  Load the Gutenberg module in your PowerShell console by the command
+  Import-Module Gutenberg. List the available cmdlets by the command
+  Get-Command -Module Gutenberg. Read the help about the PowerShell drive
+  provider for the Project Gutenberg by the command Get-Help Gutenberg.
 
 SOURCE
   Root directory contains control files for the Visual Studio project and

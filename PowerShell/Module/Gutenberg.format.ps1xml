@@ -3,7 +3,7 @@
 <!-- Copyright (C) 2012-2013 Ferdinand Prantl <prantlf@gmail.com>             -->
 <!-- All rights reserved.                                                     -->
 <!--                                                                          -->
-<!-- This file is part of GutenPosh - PowerShell drive for Project Gutenberg  -->
+<!-- This file is part of Project Gutenberg integration to PowerShell         -->
 <!--                                                                          -->
 <!-- This program is free software: you can redistribute it and/or modify     -->
 <!-- it under the terms of the GNU General Public License as published by     -->
@@ -21,9 +21,9 @@
 <Configuration>
   <SelectionSets>
     <SelectionSet>
-      <Name>GutenPoshTypes</Name>
+      <Name>GutenbergTypes</Name>
       <Types>
-        <TypeName>GutenPosh.Book</TypeName>
+        <TypeName>Gutenberg.Book</TypeName>
       </Types>
     </SelectionSet>
   </SelectionSets>
@@ -32,7 +32,7 @@
     <View>
       <Name>children</Name>
       <ViewSelectedBy>
-        <SelectionSetName>GutenPoshTypes</SelectionSetName>
+        <SelectionSetName>GutenbergTypes</SelectionSetName>
       </ViewSelectedBy>
       <TableControl>
         <TableHeaders>
@@ -66,7 +66,7 @@
     <View>
       <Name>children</Name>
       <ViewSelectedBy>
-        <SelectionSetName>GutenPoshTypes</SelectionSetName>
+        <SelectionSetName>GutenbergTypes</SelectionSetName>
       </ViewSelectedBy>
       <ListControl>
         <ListEntries>
@@ -108,7 +108,7 @@
     <View>
       <Name>children</Name>
       <ViewSelectedBy>
-        <SelectionSetName>GutenPoshTypes</SelectionSetName>
+        <SelectionSetName>GutenbergTypes</SelectionSetName>
       </ViewSelectedBy>
       <WideControl>
         <WideEntries>

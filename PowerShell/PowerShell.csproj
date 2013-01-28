@@ -55,6 +55,7 @@
     <Compile Include="Command\LoggingCmdlet.cs" />
     <Compile Include="Command\UpdateCatalog.cs" />
     <Compile Include="Utility\Log.cs" />
+    <None Include="Examples\Copy-GutenbergToFileSystem.ps1" />
     <None Include="LICENSE" />
     <Compile Include="Extension\Extensions.cs" />
     <Compile Include="Provider\DynamicParameters.cs" />
@@ -67,11 +68,9 @@
     <Compile Include="Provider\ContentReader.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Module\Gutenberg.format.ps1xml" />
+    <None Include="Module\Gutenberg.psd1" />
     <None Include="PowerShell.snk" />
-    <None Include="Module\GutenPosh.format.ps1xml">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Module\GutenPosh.psd1" />
     <None Include="README" />
   </ItemGroup>
   <ItemGroup>
@@ -90,17 +89,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>xcopy /y/i "$(TargetDir)Gutenberg.dll" "$(TargetDir)GutenPosh\"
-xcopy /y/i "$(SolutionDir)Core\$(OutDir)Gutenberg.dll.config" "$(TargetDir)GutenPosh\"
-xcopy /y/i "$(TargetDir)Gutenberg.FileSystem.dll" "$(TargetDir)GutenPosh\"
-xcopy /y/i "$(SolutionDir)FileSystem\$(OutDir)Gutenberg.FileSystem.dll.config" "$(TargetDir)GutenPosh\"
-xcopy /y/i "$(TargetDir)Gutenberg.PowerShell.dll" "$(TargetDir)GutenPosh\"
-xcopy /y/i "$(ProjectDir)Module\GutenPosh.psd1" "$(TargetDir)GutenPosh"
-xcopy /y/i "$(ProjectDir)Module\GutenPosh.format.ps1xml" "$(TargetDir)GutenPosh"
-xcopy /y/i "$(ProjectDir)Module\$(TargetFileName)-Help.xml" "$(TargetDir)GutenPosh"
-xcopy /y/i "$(ProjectDir)Module\about_GutenPosh.help.txt" "$(TargetDir)GutenPosh"
-xcopy /y/i "$(ProjectDir)README" "$(TargetDir)"
-xcopy /y/i "$(ProjectDir)LICENSE" "$(TargetDir)"</PostBuildEvent>
+    <PostBuildEvent>xcopy /y/i "$(SolutionDir)Core\$(OutDir)Gutenberg.dll.config" "$(TargetDir)"
+xcopy /y/i "$(SolutionDir)FileSystem\$(OutDir)Gutenberg.FileSystem.dll.config" "$(TargetDir)"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

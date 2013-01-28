@@ -1,7 +1,7 @@
 ﻿// Copyright (C) 2012-2013 Ferdinand Prantl <prantlf@gmail.com>
 // All rights reserved.       
 //
-// This file is part of PowerShell drive for the Project Gutenberg
+// This file is part of Project Gutenberg integration to PowerShell
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: ComVisible(false)]
 [assembly: Guid("65ea8d80-1c1e-4779-af21-f1369c19a1c1")]
-[assembly: InternalsVisibleTo("GutenPosh.Test, PublicKey=" +
+[assembly: InternalsVisibleTo("Gutenberg.PowerShell.Test, PublicKey=" +
     "00240000048000009400000006020000002400005253413100040000010001003fb1f303ff5342" +
     "7c55ff20aab89882234bd3c7a47cf50587075b7dbd4d3a1ef07881a12e50a73f4bcef1d3788256" +
     "80274f57eb4fe8186afb95c2e4d3ca3744126288f8da9daf23a237488bd9fbf2aa8fd5f05e6213" +
