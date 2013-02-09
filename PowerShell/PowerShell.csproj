@@ -56,6 +56,7 @@
     <Compile Include="Command\UpdateCatalog.cs" />
     <Compile Include="Utility\Log.cs" />
     <None Include="Examples\Copy-GutenbergToFileSystem.ps1" />
+    <None Include="Examples\Update-GutenbergCache.ps1" />
     <None Include="LICENSE" />
     <Compile Include="Extension\Extensions.cs" />
     <Compile Include="Provider\DynamicParameters.cs" />
@@ -74,7 +75,7 @@
     <None Include="README" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Module\about_GutenPosh.help.txt" />
+    <Content Include="Module\about_Gutenberg.help.txt" />
     <Content Include="Module\Gutenberg.PowerShell.dll-Help.xml" />
   </ItemGroup>
   <ItemGroup>

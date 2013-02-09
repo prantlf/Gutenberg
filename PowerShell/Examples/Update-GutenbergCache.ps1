@@ -1,7 +1,6 @@
-# Copy-GutenbergToFileSystem
+# Update-GutenbergCache
 #
-# Copies textual volumes of books passed through the pipeline to the local
-# file system.
+# Refreshes the content of the book volume cache if necessary.
 #
 # See the description in the Get-Help supporting comment below.
 #
@@ -23,27 +22,19 @@
 
 <#
 .SYNOPSIS
-    Copies textual volumes of books passed through the pipeline to the local
-    file system.
+    Refreshes the content of the book volume cache if necessary.
 .DESCRIPTION
     Goes over books from the pipeline input and picks just the books with a
     textual volume. (The books which contain at least one volume with the
     MIME type text/plain.) Content of the first textual volume of those books
-    is copied to the specified directory in the local file system. The book
-    friendly names are used for the file names.
+    is dumped to the null output which causes the volume to be downloaded
+    to the cache if it is not there or if a newer version is available.
 
-    The book volumes are downloaded to the file system cache first or if they
-    are not up-to-date. Then they are copied to the target directory from
-    there. The automatically created drive Gutenberg: places the cache to
-    the $env:LOCALAPPDATA\Gutenberg directory.
+    The automatically created drive Gutenberg: places the cache to the
+    $env:LOCALAPPDATA\Gutenberg directory.
 
     A warning is printed out for every book from the pipeline which has no
     textual volume and will be skipped.
-.PARAMETER TargetDirectory
-    Target directory to write the books to.
-
-    This parameter can be unnamed at the first positoin. If no value is
-    provided the current directory will be used by default.
 .INPUTS
     A book or a book collection to process. Other than textual books will be
     filtered out.
@@ -51,11 +42,11 @@
     An object with the book number (Number) and the file name (Name) will be
     written to the pipeline for every processed book.
 .EXAMPLE
-    ls Gutenberg: | ? Authors -like "*Dumas*" | Copy-GutenbergToFileSystem
+    ls Gutenberg: | ? Authors -like "*Dumas*" | Update-GutenbergCache
 
-    Copies all works of Alexandre Dumas to the current directory. Well, it
-    would catch more Dumases but there is just one in the Project Gutenberg
-    - the Alexandre :-)
+    Makes sure that all works of Alexandre Dumas are in the file system
+    cache. to the current directory. Well, it would catch more Dumases but
+    there is just one in the Project Gutenberg - the Alexandre :-)
 .NOTES
     Version:   1.0
     Date:      February 9, 2013
@@ -71,35 +62,23 @@
 [CmdletBinding(SupportsShouldProcess = $true)]
 
 Param (
-    [Parameter(Mandatory = $true, ValueFromPipeline = $true,
+	[Parameter(Mandatory = $true, ValueFromPipeline = $true,
 	           HelpMessage = 'Collection of books to process. ' +
 			                 'Other than textual books are filtered out.')]
-    [object] $Books,
-    [Parameter(Position = 0,
-	           HelpMessage = 'Target directory to write the books to. ' +
-			                 'Current directory is the default.')]
-    [string] $TargetDirectory
+    [object] $Books
 )
 
 Process {
 	$book = $_;
 	if ($_.Formats -like "*text/plain*") {
-		# Make sure the the file name for the book volume is valid; So far,
-		# question marks and line breaks have been detected.
-		$name = $book.FriendlyTitle.Replace("?", "").
-					Replace([Environment]::NewLine, " - ") + ".txt"
-		Write-Output @{ Number = $book.Number; Name = $name }
-		$content = cat "$($book.PSDrive):$($book.Number)" -Format text/plain
-		$target = $name
-		if ($TargetDirectory) {
-			$target = "$TargetDirectory\" + $target
-		}
-		sc $target $content
+		Write-Output @{ Number = $book.Number; Name = $book.FriendlyTitle }
+		# The content is thrown away here but the cache will be refreshed
+		# during the content retrieval if necessary.
+		cat "$($book.PSDrive):$($book.Number)" -Format text/plain > $null
 		# Be friendly and don't hammer the Project Gutenberg web site too much.
 		# Not every book volume needs an update but we cannot figure it out here.
 		sleep 1
 	} else {
-		Write-Warning "Book $($book.Number) ($($book.FriendlyTitle)) has " +
-                      "no textual volume."
+		Write-Warning "Book $($book.Number) has no textual volume."
 	}
 }
