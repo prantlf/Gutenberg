@@ -23,5 +23,25 @@ namespace Gutenberg
     [TestFixture]
     public class PathUtilityTest
     {
+        [Test]
+        public void TestJoinPath() {
+            Assert.AreEqual("", PathUtility.JoinPath(""));
+            Assert.AreEqual("", PathUtility.JoinPath("", ""));
+            Assert.AreEqual("a", PathUtility.JoinPath("a"));
+            Assert.AreEqual("a", PathUtility.JoinPath(" a "));
+            Assert.AreEqual("a/b", PathUtility.JoinPath("a", "b"));
+            Assert.AreEqual("a/b", PathUtility.JoinPath("a/", "b"));
+            Assert.AreEqual("a/b", PathUtility.JoinPath("a", "/b"));
+            Assert.AreEqual("a/b", PathUtility.JoinPath("a/", "/b"));
+        }
+
+        [Test]
+        public void TestGetChildName() {
+            Assert.AreEqual("", PathUtility.GetChildName(""));
+            Assert.AreEqual("", PathUtility.GetChildName("folder/"));
+            Assert.AreEqual("file", PathUtility.GetChildName("file"));
+            Assert.AreEqual("file", PathUtility.GetChildName("folder/file"));
+            Assert.AreEqual("file", PathUtility.GetChildName("folder1/folder2/file"));
+        }
     }
 }

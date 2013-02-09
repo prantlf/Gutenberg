@@ -26,7 +26,7 @@ namespace Gutenberg
     public class StringExtensionTest
     {
         [Test]
-        public void TestThatIsEmptyFailsWithNull() {
+        public void TestIsEmptyFailsWithNull() {
             try {
                 ((string) null).IsEmpty();
                 Assert.Fail("NullReferenceException not thrown.");
@@ -34,13 +34,13 @@ namespace Gutenberg
         }
 
         [Test]
-        public void TestThatIsEmptyReturnsCorrectResult() {
+        public void TestIsEmpty() {
             Assert.IsTrue("".IsEmpty());
             Assert.IsFalse("a".IsEmpty());
         }
 
         [Test]
-        public void TestThatIsStartsWithReturnsCorrectResult() {
+        public void TestStartsWith() {
             Assert.IsFalse("".StartsWith('a'));
             Assert.IsFalse("b".StartsWith('a'));
             Assert.IsFalse("ba".StartsWith('a'));
@@ -55,7 +55,7 @@ namespace Gutenberg
         }
 
         [Test]
-        public void TestThatIsEndsWithReturnsCorrectResult() {
+        public void TestEndsWith() {
             Assert.IsFalse("".EndsWith('a'));
             Assert.IsFalse("b".EndsWith('a'));
             Assert.IsFalse("ab".EndsWith('a'));
@@ -67,6 +67,23 @@ namespace Gutenberg
             Assert.IsFalse(new StringBuilder("ab").EndsWith('a'));
             Assert.IsTrue(new StringBuilder("a").EndsWith('a'));
             Assert.IsTrue(new StringBuilder("ba").EndsWith('a'));
+        }
+
+        [Test]
+        public void TestLike() {
+            Assert.IsTrue("".Like(""));
+            Assert.IsTrue("a".Like(""));
+            Assert.IsFalse("".Like("a"));
+            Assert.IsFalse("b".Like("a"));
+            Assert.IsTrue("ab".Like("a"));
+            Assert.IsTrue("ba".Like("a"));
+            Assert.IsTrue("".Like("*"));
+            Assert.IsTrue("a".Like("*"));
+            Assert.IsTrue("a".Like("a*"));
+            Assert.IsTrue("a".Like("*a"));
+            Assert.IsTrue("ab".Like("a*"));
+            Assert.IsFalse("ba".Like("a*"));
+            Assert.IsTrue("bab".Like("*a*"));
         }
     }
 }
