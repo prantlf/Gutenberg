@@ -53,6 +53,7 @@
     <Compile Include="Source\CatalogParser.cs" />
     <Compile Include="Source\BinaryParser.cs" />
     <Compile Include="Source\BookParser.cs" />
+    <Compile Include="Source\Unpacker.cs" />
     <Compile Include="Source\VolumeParser.cs" />
     <Compile Include="Source\LibraryParser.cs" />
     <Compile Include="Source\Library.cs" />

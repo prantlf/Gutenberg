@@ -16,22 +16,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using System.Linq;
 using System.Management.Automation;
-using System.Reflection;
 
 namespace Gutenberg.PowerShell
 {
     // Additional methods and method overloads which would be useful in particular classes. They
     // are organized by the class which they attach to.
-
-    static class AssemblyExtension
-    {
-        public static T GetAssemblyAttribute<T>(this Assembly assembly) {
-            var attributes = assembly.GetCustomAttributes(false);
-            return (T) attributes.First(item => item is T);
-        }
-    }
 
     static class PSObjectExtension
     {

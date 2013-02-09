@@ -16,9 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using System;
 using System.IO;
-using System.Linq;
 
 namespace Gutenberg
 {
@@ -27,43 +25,16 @@ namespace Gutenberg
         public new Stream Open() {
             var stream = base.Open();
             try {
-                var result = OpenOrUnpack(stream);
-                if (result != stream)
+                Stream result;
+                if (new Unpacker { Log = Log }.TryUnpack(stream, out result))
                     stream.Close();
+                else
+                    result = stream;
                 return result;
             } catch {
                 stream.Close();
                 throw;
             }
-        }
-
-        Stream OpenOrUnpack(Stream stream) {
-            Log.Verbose("Checking compression...");
-            if (ZipStorer.IsZip(stream))
-                using (var store = ZipStorer.Open(stream, FileAccess.Read)) {
-                    var entry = store.ReadCentralDir().First();
-                    Log.Verbose("Extracting {0}...", entry.FilenameInZip);
-                    var content = new MemoryStream();
-                    const int step = 65536, factor = 160;
-                    Progress progress = Log.Action((int) (entry.FileSize / (step * factor) + 2),
-                        "Extracting {0}...", entry.FilenameInZip);
-                    int count = 1;
-                    if (store.ExtractStream(entry, content, step, size => {
-                        if (count * step * factor <= size) {
-                            progress.Continue("{0} bytes extracted...", size);
-                            ++count;
-                        }
-                    })) {
-                        content.Position = 0;
-                        Log.Verbose("{0} bytes were extracted.", content.Length);
-                        progress.Finish();
-                        return content;
-                    }
-                    content.Dispose();
-                    throw new ApplicationException("Compression not supported.");
-                }
-            stream.Position = 0;
-            return stream;
         }
 
         protected override string Url {

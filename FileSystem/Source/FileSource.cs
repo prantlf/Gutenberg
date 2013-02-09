@@ -17,12 +17,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Text;
 
 namespace Gutenberg.FileSystem
@@ -62,38 +59,15 @@ namespace Gutenberg.FileSystem
 
         void Download(Volume volume, string path) {
             var url = PathUtility.JoinPath(CatalogParser.ProjectUrl, volume.URL);
-            Log.Verbose("Downloading {0}...", url);
-            var client = new WebClient();
-            using (var input = client.OpenRead(url))
-                try {
-                    string sizevalue = client.ResponseHeaders[HttpResponseHeader.ContentLength];
-                    const int step = 65536;
-                    Progress progress = null;
-                    int count = 1;
-                    if (!string.IsNullOrEmpty(sizevalue)) {
-                        int steps = int.Parse(sizevalue, CultureInfo.InvariantCulture) / step;
-                        progress = Log.Action(steps, "Downloading {0}...", url);
-                    }
-                    Log.Verbose("Writing {0}...", path);
-                    EnsureDirectory();
-                    using (var output = File.OpenWrite(path))
-                        for (var buffer = new byte[step]; ; ) {
-                            var length = input.Read(buffer, 0, buffer.Length);
-                            if (length <= 0)
-                                break;
-                            output.Write(buffer, 0, length);
-                            if (progress != null && count * step <= output.Length) {
-                                progress.Continue("{0} bytes transferred...", output.Length);
-                                ++count;
-                            }
-                        }
-                    Log.Verbose("{0} bytes were transferred.", sizevalue);
-                    if (progress != null)
-                        progress.Finish();
-                } catch {
-                    IOUtility.DeleteTempFile(path);
-                    throw;
-                }
+            try {
+                Log.Verbose("Writing {0}...", path);
+                EnsureDirectory();
+                using (var output = File.OpenWrite(path))
+                    new Downloader(url) { Log = Log }.Transfer(output); 
+            } catch {
+                IOUtility.DeleteTempFile(path);
+                throw;
+            }
         }
 
         Encoding GetEncoding(Volume volume) {

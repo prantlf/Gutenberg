@@ -20,7 +20,9 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Management.Automation;
+using System.Reflection;
 using System.Text;
 using System.Xml;
 
@@ -353,6 +355,19 @@ namespace Gutenberg
                 else if (type == typeof(string[]))
                     writer.WriteValueElement(name, (string[]) value);
                 throw new InvalidOperationException("Unsupported type.");
+            }
+        }
+    }
+
+    public static class AssemblyExtension
+    {
+        public static T GetAssemblyAttribute<T>(this Assembly assembly) {
+            try {
+                var attributes = assembly.GetCustomAttributes(false);
+                return (T) attributes.First(item => item is T);
+            } catch (InvalidOperationException) {
+                throw new ApplicationException(string.Format(
+                    "The assembly {0} does not have the attribute {1}.", assembly, typeof(T)));
             }
         }
     }
