@@ -22,41 +22,59 @@ using Debugger = System.Diagnostics.Debugger;
 
 namespace Gutenberg
 {
-    // Encapsulates logging functionality so that it can be used from other components than
-    // the drive provider itself (which only has an access to the console).
+    // Encapsulates logging functionality so that it can be used from common components
+    // independent on the system which provides the logging target (PowerShell, file etc.).
     public interface Log
     {
+        // Issues a verbose message to the log.
         void Verbose(string message);
 
+        // Issues a formatted verbose message to the log.
         void Verbose(string format, params object[] args);
 
+        // Issues a warning message to the log.
         void Warning(string message);
 
+        // Issues a formatted warning message to the log.
         void Warning(string format, params object[] args);
 
+        // Returns an object which will be used to report progress of a long running action.
+        // The number of steps which will be reported should be estimated as well as possible.
         Progress Action(int steps, string name);
 
+        // Returns an object which will be used to report progress of a long running action.
+        // The action name is formattable.
         Progress Action(int steps, string format, params object[] args);
 
+        // Reports a progress of a long running action. This method is not to be called directly;
+        // it is called by Action implementations.
         void Progress(int number, string name, bool last, int percent, string message);
 
+        // Reports a progress of a long running action. This method is not to be called directly;
+        // it is called by Action implementations. The progress message is formattable.
         void Progress(int number, string name, bool last, int percent,
                       string format, params object[] args);
     }
 
+    // Encapsulates long operation progress reporting functionality so that it can be used from
+    // common components independent on the rendering system (PowerShell, file etc.).
     public interface Progress
     {
+        // Reports that the action has started.
         void Start();
 
+        // Reports another step in the action progress.
         void Continue(string message);
 
+        // Reports another step in the action progtess as a formattable message.
         void Continue(string format, params object[] args);
 
+        // Reports that the action has finished.
         void Finish();
     }
 
-    // Does nothing; it just implements the interface. It can be used at times when no drive
-    // provider is available.
+    // Does nothing; it just implements the interface. It can be used if logging has been turned
+    // off or no Log instance as been set for the working object.
     public class DummyLog : Log
     {
         DummyLog() {}
@@ -85,6 +103,8 @@ namespace Gutenberg
         public static readonly Log Instance = new DummyLog();
     }
 
+    // Does nothing; it just implements the interface. It can be used if logging has been turned
+    // off or no Log instance as been set for the working object. It is used by DummyLog.
     public class DummyProgress : Progress
     {
         DummyProgress() {}
@@ -100,6 +120,7 @@ namespace Gutenberg
         public static readonly Progress Instance = new DummyProgress();
     }
 
+    // Base class for loggers providing common implementation for convenience method overloads.
     public abstract class ProgressiveLog : Log
     {
         public void Verbose(string format, params object[] args) {
@@ -112,6 +133,9 @@ namespace Gutenberg
 
         public Progress Action(int steps, string name) {
             var progress = new LogProgress(this, name, steps);
+            // While a Progress object can be constructed and started later, there is no such
+            // case in this project. For convenience, loggers in this project start the progress
+            // of the just created action immediately.
             progress.Start();
             return progress;
         }
@@ -133,6 +157,10 @@ namespace Gutenberg
                                       string message);
     }
 
+    // Logger writing to the Windows debugging output. It can be watched by a debugger attached
+    // to the logging process. There are tools like DbgView from www.sysinternals.com which
+    // attach to processes not to debug, but to listen on the Windows debugging output and print
+    // the buzz, which makes this logger the most lightweight logging option.
     public class DebugLog : ProgressiveLog
     {
         DebugLog() {}
@@ -152,6 +180,8 @@ namespace Gutenberg
             Debugger.Log(Status, null, string.Format("{0}:   {1} {2}%", number, message, percent));
         }
 
+        // Numbers 0-100 can be used to express the severity of the message but we use the API
+        // just for course logging and not for error reporting.
         const int Trace = 0;
         const int Status = 20;
         const int Warn = 40;
@@ -159,6 +189,9 @@ namespace Gutenberg
         public static readonly Log Instance = new DebugLog();
     }
 
+    // Special logger which doesn't have a specific target but delegates the writing to other
+    // loggers which are attached to it. It can be used to log to two targets simultaneously;
+    // print to the PowerShell console but still filling the debugging output, for example.
     public class DispatchLog : ProgressiveLog
     {
         public readonly List<Log> Logs = new List<Log>();
@@ -188,6 +221,9 @@ namespace Gutenberg
         }
     }
 
+    // Base class for progres reporters handling the action progress the most usual way: by incrementing
+    // the advance counter from zero to the specified step count. It is actually built in to the
+    // Log interface, so the loggers have actually no choose...
     public abstract class SteppedProgress : Progress
     {
         public string Name { get; private set; }
@@ -206,9 +242,12 @@ namespace Gutenberg
             if (name.IsEmpty())
                 throw new ArgumentException("Name cannot be empty.", "name");
             Name = name;
+            // Progress reports are identified by a unique number so that we can nest internal
+            // long running actions in their higher-level ones. We just use a rotating counter.
             if (LastNumber == Int32.MaxValue)
                 LastNumber = 0;
             Number = ++LastNumber;
+            // The progress value used by the descendant classes will be a real number <0;100>.
             ProgressValue = 0;
             ProgressIncrement = 100.0 / steps;
         }
@@ -229,6 +268,7 @@ namespace Gutenberg
         }
     }
 
+    // The progress reporter depending exclusively on a logger to send its status to.
     public class LogProgress : SteppedProgress
     {
         public Log Log { get; private set; }

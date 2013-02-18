@@ -20,8 +20,11 @@ using System.IO;
 
 namespace Gutenberg
 {
+    // Provides access to the Project Gutenberg catalog from the Internet.
     public class Catalog : RemoteSource
     {
+        // Opens the Project Gutenberg catalog from the specified URL. If the content is packed
+        // by ZIP it will be returned unpacked.
         public new Stream Open() {
             var stream = base.Open();
             try {
@@ -37,11 +40,14 @@ namespace Gutenberg
             }
         }
 
+        // URL of the Project Gutenberg catalog. The default value is read from the application
+        // settings property CatalogURL.
         protected override string Url {
             get { return url; }
         }
         string url = Settings.GetValue<string>(typeof(Catalog), "CatalogURL");
 
+        // Overrides the default Project Gutenberg catalog URL.
         public void SetUrl(string value) {
             url = value;
         }

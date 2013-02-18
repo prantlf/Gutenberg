@@ -85,7 +85,10 @@ namespace Gutenberg.FileSystem
 
         public void Convert(CatalogParser parser, XmlReader reader, Date created,
                             Stream bookStream, Stream volumeStream) {
-            var progress = Log.Action(55, "Converting catalog...");
+            // There are almost 42,000 books and 520,000 files in the project Gutenberg. We set
+            // up 59 * 10,000 steps here to have the progress bar stretching quite good and still
+            // having a little space to grow for the project content.
+            var progress = Log.Action(59, "Converting catalog...");
             int bookCount = 0, skippedCount = 0, volumeCount = 0, totalCount = 0;
             var bookParser = new BookParser { Log = Log };
             var volumeParser = new VolumeParser { Log = Log };
@@ -106,6 +109,8 @@ namespace Gutenberg.FileSystem
                         volumeParser.Write(volumeWriter, (Volume) item);
                         ++volumeCount;
                     }
+					// One step after every 10,000 items run nicely on my laptop; less loaded the
+					// CPU with constant reporting and more made the console wait for too long.
                     if (++totalCount % 10000 == 0)
                         progress.Continue("{0} items processed...", totalCount);
                 }

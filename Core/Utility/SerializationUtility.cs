@@ -24,9 +24,10 @@ using System.Xml;
 
 namespace Gutenberg
 {
+    // Helps serializing of classes bearing their information in public properties
     public static class SerializationUtility
     {
-        public static IEnumerable<Property> GetProperties(Type type) {
+        public static IEnumerable<Property> GetProperties(Type type, bool default) {
             return type.GetProperties().Where(property =>
                 property.GetCustomAttributes(typeof(PropertyAttribute), false).Any()).Select(
                     property => new Property {
@@ -71,7 +72,10 @@ namespace Gutenberg
     }
 
     [AttributeUsage(AttributeTargets.Property)]
-    class PropertyAttribute : Attribute {}
+    public class PropertyAttribute : Attribute {}
+
+    [AttributeUsage(AttributeTargets.Property)]
+    public class NoPropertyAttribute : Attribute {}
 
     public class Property
     {

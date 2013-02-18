@@ -23,34 +23,50 @@ using System.Linq;
 
 namespace Gutenberg
 {
+    // Provides book enumeration and lookup with contents of book and volume sources in memory.
+    // The sources are read once on the every first usage and arrays and maps are created for
+    // better performance. This operation takes considerable time (like a couple of seconds).
+    //
+    // After creating an instance of this class, Log, BookSource and VolumeSource must be set
+    // before any method is called on the instance.
     public class Cache : LoggableBase
     {
+        // Source of books.
         public Books BookSource {
             get {
+                // Setting the book source should be done immediately after constructing a Cache.
                 if (bookSource == null)
                     throw new InvalidOperationException("Books property has not been set.");
                 return bookSource;
             }
             set {
                 bookSource = value;
+                // The assigned book source should use the same logger as the cache regardless
+                // when the logger is set; even  after assigning the volume source.
                 UpdateLog();
             }
         }
         Books bookSource;
 
+        // Source of book volumes.
         public Volumes VolumeSource {
             get {
+                // The volume source should be set immediately after constructing a Cache.
                 if (volumeSource == null)
                     throw new InvalidOperationException("Volumes property has not been set.");
                 return volumeSource;
             }
             set {
                 volumeSource = value;
+                // The assigned volume source should use the same logger as the cache regardless
+                // when the logger is set; even  after assigning the volume source.
                 UpdateLog();
             }
         }
         Volumes volumeSource;
 
+        // If someone set Log on this object it should be the same for all objects owned by it.
+        // This method will propagate the Log instance to them.
         protected override void UpdateLog() {
             base.UpdateLog();
             if (bookSource != null)
@@ -59,22 +75,30 @@ namespace Gutenberg
                 volumeSource.Log = Log;
         }
 
+        // Checks if both book and volume sources have their content available.
         public bool HasLibrary {
             get { return BookSource.HasBooks && VolumeSource.HasVolumes; }
         }
 
+        // Gets a book by its name or number. (If the string contains only digits it will be
+        // interpreted as a number.)
         public Book GetBook(string name) {
             int number;
             if (int.TryParse(name, NumberStyles.Integer,
                                 CultureInfo.InvariantCulture, out number)) {
+                // Numbers out of range will cause the array access throw and other invalid
+                // numbers will be caught right afterwards.
                 var book = BooksByNumber[number];
                 if (book == null)
                     throw new ArgumentOutOfRangeException("number");
                 return book;
             }
+            // This will throw if the name doesn't match a book title.
             return BooksByName[name];
         }
 
+        // Gets a book by its name or number if it exists, not throwing and exception if it does
+        // not. (If the string contains only digits it will be interpreted as a number.)
         public bool TryGetBook(string name, out Book book) {
             int number;
             if (int.TryParse(name, NumberStyles.Integer,
@@ -89,6 +113,8 @@ namespace Gutenberg
             return BooksByName.TryGetValue(name, out book);
         }
 
+        // Checks if a book with the specified name or number exists. (If the string contains
+        // only digits it will be interpreted as a number.)
         public bool HasBook(string name) {
             int number;
             if (int.TryParse(name, NumberStyles.Integer,
@@ -98,6 +124,7 @@ namespace Gutenberg
             return BooksByName.ContainsKey(name);
         }
 
+        // Gets volumes for the specified book number.
         public bool TryGetVolumes(int number, out Volume[] volumes) {
             if (number >= 0 && number < VolumesByNumber.Length) {
                 volumes = VolumesByNumber[number];
@@ -107,20 +134,34 @@ namespace Gutenberg
             return false;
         }
 
+        // Enumerates over all books; it will load them to memory to allow multiple without
+        // reloading the books constantly.
         public IEnumerable<Book> Books {
             get {
                 if (books == null) {
                     books = BookSource.GetBooks().ToArray();
+                    // There are almost 42,000 books in the project Gutenberg. We set up 10 *
+                    // 5,000 steps here to have the progress bar stretching quite good and still
+                    // having a little space to grow for the project content.
                     var progress = Log.Action(10, "Completing books...");
                     int bookCount = 0, skippedCount = 0;
                     foreach (var book in books) {
                         Volume[] volumes;
+                        // Volumes are needed by the book to know MIME types and URLs of the
+                        // files with the book content. They are in a different source and thus
+                        // items from the two sources - books and volumes - must be joined here.
                         if (TryGetVolumes(book.Number, out volumes))
                             book.Volumes = volumes;
                         else {
+                            // You may want to warn about a book that has no content but there are
+                            // actually a couple of them in the Project Gutenberg and it is
+                            // unlikely that they would get fixed. Let's not nag by a warning
+                            // every time but do report it nevertheless.
                             Log.Verbose("The book {0} has no volumes.", book.Number);
                             ++skippedCount;
                         }
+                        // One step after every 5,000 items run nicely on my laptop; less loaded
+                        // the CPU with constant reporting and more made the console waiting long.
                         if (++bookCount % 5000 == 0)
                             progress.Continue("{0} books processed...", bookCount);
                     }
@@ -133,14 +174,24 @@ namespace Gutenberg
         }
         IEnumerable<Book> books;
 
+        // Provides a map of books using their name as the key. (If there are multiple books with
+        // the same name the last wins and will be stored in the map.)
         IDictionary<string, Book> BooksByName {
             get {
                 if (booksByName == null) {
+                    // There are almost 42,000 books in the project Gutenberg. We set up 10 *
+                    // 5,000 steps here to have the progress bar stretching quite good and still
+                    // having a little space to grow for the project content.
                     var progress = Log.Action(10, "Organizing books by title...");
                     booksByName = new Dictionary<string, Book>(ConfigurableComparer<string>.CaseInsensitive);
                     int bookCount = 0;
-                    foreach (var book   in Books) {
+                    foreach (var book in Books) {
+                        // The last one wins and previous books with the same title will fall
+                        // behind but well, you whould enumerate all books and pick them by
+                        // comparing tiles one by one if you want to anticipate this rare case.
                         booksByName[book.FriendlyTitle] = book;
+                        // One step after every 5,000 items run nicely on my laptop; less loaded
+                        // the CPU with constant reporting and more made the console waiting long.
                         if (++bookCount % 5000 == 0)
                             progress.Continue("{0} books processed...", bookCount);
                     }
@@ -151,14 +202,26 @@ namespace Gutenberg
         }
         IDictionary<string, Book> booksByName;
 
+        // Provides an array of books to access by the book number. (Not every number points to a
+        // book; the array may contain nulls for unused numbers.)
         Book[] BooksByNumber {
             get {
                 if (booksByNumber == null) {
+                    // There are almost 42,000 books in the project Gutenberg. We set up 10 *
+                    // 5,000 steps here to have the progress bar stretching quite good and still
+                    // having a little space to grow for the project content.
                     var progress = Log.Action(10, "Organizing books by number...");
-                    booksByNumber = new Book[100000];
+                    // Quick and dirty way how to deal with unused book numbers. Not every one
+                    // is used and thus there will be holes in the array. Let's assume that the
+                    // Project Gutenberg maintainers are not totally crazy and assign more
+                    // numbers to books than they skip; otherwise the array will be too small
+                    // and the caller will get an exception thrown from the following loop.
+                    booksByNumber = new Book[Books.Count() * 2];
                     int bookCount = 0;
                     foreach (var book in Books) {
                         booksByNumber[book.Number] = book;
+                        // One step after every 5,000 items run nicely on my laptop; less loaded
+                        // the CPU with constant reporting and more made the console waiting long.
                         if (++bookCount % 5000 == 0)
                             progress.Continue("{0} books processed...", bookCount);
                     }
@@ -169,18 +232,34 @@ namespace Gutenberg
         }
         Book[] booksByNumber;
 
+        // Enumerates over all book volumes; it will load them to memory to allow multiple
+        // without reloading the book volumes constantly.
         IEnumerable<Volume> Volumes {
             get { return volumes ?? (volumes = VolumeSource.GetVolumes().ToArray()); }
         }
         IEnumerable<Volume> volumes;
 
+        // Provides an array of book volumes to access by the book number. (Not every number
+        // points to a book and not every book has volumes; the array may contain nulls in
+        // such cases occur.)
         Volume[][] VolumesByNumber {
             get {
                 if (volumesByNumber == null) {
+                    // There are almost 520,000 files in the project Gutenberg. We set up 53 *
+                    // 10,000 steps here to have the progress bar stretching quite good and still
+                    // having a little space to grow for the project content.
                     var progress = Log.Action(53, "Organizing volumes...");
                     int count = 0;
+                    // Quick and dirty way how to deal with unused book numbers. Not every one
+                    // is used and thus there will be holes in the array. Let's assume that the
+                    // Project Gutenberg maintainers are not totally crazy and assign more
+                    // numbers to books than they skip; otherwise the array will be too small
+                    // and the caller will get an exception thrown from the following loop.
                     volumesByNumber = new Volume[100000][];
                     foreach (var volume in Volumes) {
+                        // Volumes are organized by their book number. The first one will create
+                        // the volume array within the book, the rest will be appended to the end
+                        // as they appear in the volume source.
                         Volume[] volumes = volumesByNumber[volume.Number];
                         if (volumes != null)
                             Array.Resize(ref volumes, volumes.Length + 1);
@@ -188,6 +267,9 @@ namespace Gutenberg
                             volumes = new Volume[1];
                         volumes[volumes.Length - 1] = volume;
                         volumesByNumber[volume.Number] = volumes;
+                        // One step after every 10,000 items run nicely on my laptop; less would
+                        // load the CPU with constant reporting and more would wait too long in
+                        // the console.
                         if (++count % 10000 == 0)
                             progress.Continue("{0} volumes processed...", count);
                     }

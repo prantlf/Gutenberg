@@ -33,9 +33,14 @@ namespace Gutenberg
 
     public static class StringExtension
     {
+        // If your string cannto be null you can test it for emptiness with shorter expression
+        // and/or maybe better performance than the string.IsNullOrEmty provides. Well, I use it
+        // because of the former benefit; the latter would be not worth doing this...
         public static bool IsEmpty(this string s) {
             return s.Length == 0;
         }
+
+        // Methods StartsWith and EndsWith do not have overloads with a single char.
 
         public static bool StartsWith(this string s, char c) {
             return s.Length > 0 && s[0] == c;
@@ -53,7 +58,8 @@ namespace Gutenberg
             return s.Length > 0 && s[s.Length - 1] == c;
         }
 
-        // The abbreviation CI means using the flag CurrentCultureIgnoreCase for the string
+        // These overloads save time when writing the most common comparison options. The
+        // abbreviation CI means using the flag CurrentCultureIgnoreCase for the string
         // comparison, the abbreviation II the InvariantCultureIgnoreCase flag.
 
         public static bool EqualsCI(this string left, string right) {
@@ -96,6 +102,9 @@ namespace Gutenberg
             return hay.IndexOf(needle, StringComparison.InvariantCultureIgnoreCase);
         }
 
+        // If the whildcard matching is used often the following methods save time. They depend
+        // on the WildcardPattern class from the System.Management.Automation namespace.
+    
         public static bool Like(this string hay, string needle) {
             if (WildcardPattern.ContainsWildcardCharacters(needle)) {
                 var pattern = new WildcardPattern(needle, WildcardOptions.None);
@@ -124,6 +133,9 @@ namespace Gutenberg
 
     public static class IOExtension
     {
+        // Stream and TextReader lack eading or transferring the entire content by a single
+        // method; at least in .NET 2.0.
+
         public static void CopyTo(this Stream input, Stream output) {
             byte[] buffer = new byte[65536];
             int read;
@@ -136,8 +148,10 @@ namespace Gutenberg
             if (memory != null)
                 return memory.ToArray();
             byte[] buffer = new byte[input.Length];
-            var read = input.Read(buffer, 0, buffer.Length);
-            if (read != buffer.Length)
+            var start = 0, read = 0;
+            for (; (read = input.Read(buffer, start, buffer.Length - start)) > 0;
+                        start += read) {}
+            if (start != buffer.Length)
                 throw new ApplicationException("Premature end of the stream.");
             return buffer;
         }
@@ -150,10 +164,16 @@ namespace Gutenberg
 
     static class BinaryReaderExtension
     {
+        // Methods handling additional data types; basic set of data types is built in to the
+        // BinaryReader.
+
         public static string[] ReadStrings(this BinaryReader reader) {
             var count = reader.ReadInt32();
+            // If the string array was null the method Write wrote -1 for us to recognize it.
             if (count < 0)
                 return null;
+            // The array was serialized in a classic way - count first and the items next to
+            // allow the complete array allocation when deserializing it.
             var values = new string[count];
             for (var i = 0; i < count; ++i)
                 values[i] = reader.ReadString();
@@ -161,6 +181,8 @@ namespace Gutenberg
         }
 
         public static string ReadText(this BinaryReader reader) {
+            // The method Write preceeds every string with a bool; false to mark a null string
+            // and true to preceed the actual string value.
             return reader.ReadBoolean() ? reader.ReadString() : null;
         }
 
@@ -173,6 +195,8 @@ namespace Gutenberg
         }
 
         public static YearSpan ReadYearSpan(this BinaryReader reader) {
+            // A year span is serialized as two integers - first and last year. If the year span
+            // was empty the writer wrote the first number -1 for us to recognize it.
             var first = reader.ReadInt32();
             return first < 0 ? YearSpan.Empty : new YearSpan(first, reader.ReadInt32());
         }
@@ -190,23 +214,33 @@ namespace Gutenberg
                 return reader.ReadYearSpan();
             if (type == typeof(string[]))
                 return reader.ReadStrings();
+            // More types can be added; it is just that they were not needed for this project.
             throw new InvalidOperationException("Unsupported type.");
         }
     }
 
     static class BinaryWriterExtension
     {
+        // Methods handling additional data types; basic set of data types is built in to the
+        // BinaryWriter.
+
         public static void Write(this BinaryWriter writer, string[] values) {
             if (values != null) {
+                // The array is serialized in a classic way - count first and the items next to
+                // allow the complete array allocation when deserializing it.
                 writer.Write(values.Length);
                 foreach (var value in values)
                     writer.Write(value);
             } else {
+                // If the string array is null the method Read will be able to recognize it by
+                // detecting a negative (invalid) array length.
                 writer.Write(-1);
             }
         }
 
         public static void WriteText(this BinaryWriter writer, string value) {
+            // We preceed every string with a bool; false to mark a null string and true to
+            // preceed the actual string value. This is used during deserialization.
             if (value == null) {
                 writer.Write(false);
             } else {
@@ -224,6 +258,8 @@ namespace Gutenberg
         }
 
         public static void Write(this BinaryWriter writer, YearSpan value) {
+            // An empty year span is recognized during the deserialization by noticing a negative
+            // (invalid) value for the first year written. A valid year span has positive numbers.
             if (value.IsEmpty) {
                 writer.Write(-1);
             } else {
@@ -246,18 +282,24 @@ namespace Gutenberg
             else if (type == typeof(string[]))
                 writer.Write((string[]) value);
             else
+                // More types can be added; it is just that they were not needed in this project.
                 throw new InvalidOperationException("Unsupported type.");
         }
     }
 
     static class XmlReaderExtension
     {
+        // Surprisingly, moving the reader position to the nearest element and skipping the
+        // whitespace and/or other content is missing in the standard XmlReader.
         public static bool ReadToFollowingElement(this XmlReader reader) {
             while (reader.Read())
                 if (reader.NodeType == XmlNodeType.Element)
                     return true;
             return false;
         }
+
+        // Methods handling additional data types; basic set of data types is built in to the
+        // XmlReader.
 
         public static Date ReadElementContentAsDate(this XmlReader reader) {
             var value = reader.ReadElementContentAsString();
@@ -271,6 +313,9 @@ namespace Gutenberg
 
         public static IEnumerable<string> ReadElementContentAsStrings(this XmlReader reader) {
             using (var subreader = reader.ReadSubtree()) {
+                // The sub-reader is not set up at the position of the first child element; it
+                // starts somewhere in front of the parentin was created from. Firstly, we make
+                // sure we point to the parent and then we walk through the children one by one.
                 var value = subreader.ReadToFollowingElement();
                 while (subreader.ReadToFollowingElement())
                     yield return subreader.ReadElementContentAsString();
@@ -290,12 +335,19 @@ namespace Gutenberg
                 return reader.ReadElementContentAsYearSpan();
             if (type == typeof(string[]))
                 return reader.ReadElementContentAsStrings();
+            // More types can be added; it is just that they were not needed in this project.
             throw new InvalidOperationException("Unsupported type.");
         }
     }
 
     static class XmlWriterExtension
     {
+        // Methods handling additional data types; basic set of data types is built in to the
+        // XmlWriter. In general, the methods avoid writing anything if being given a null value
+        // or a value which is default for the particular type; like 0 for int. In comparison
+        // with binary serialization, XML can be deserialized using the element names and such
+        // (missing) default value can be detected by the entirely missing element.
+
         public static void WriteValueElement(this XmlWriter writer, string name, string value) {
             if (value != null)
                 writer.WriteElementString(name, value);
@@ -331,7 +383,8 @@ namespace Gutenberg
                                              IEnumerable<string> values) {
             if (values != null) {
                 writer.WriteStartElement(name);
-                // Cut the trailing 's' from the element name.
+                // Cut the trailing 's' from the element name. Not generic enough but simple and
+                // working for this project so far.
                 name = name.Substring(0, name.Length - 1);
                 foreach (var value in values)
                     writer.WriteElementString(name, value);
@@ -354,6 +407,7 @@ namespace Gutenberg
                     writer.WriteValueElement(name, (YearSpan) value);
                 else if (type == typeof(string[]))
                     writer.WriteValueElement(name, (string[]) value);
+                // More types can be added; it is just that they were not needed in this project.
                 throw new InvalidOperationException("Unsupported type.");
             }
         }
@@ -361,6 +415,7 @@ namespace Gutenberg
 
     public static class AssemblyExtension
     {
+        // If you use often multiple assembly attributes this typed getter will come handy.
         public static T GetAssemblyAttribute<T>(this Assembly assembly) {
             try {
                 var attributes = assembly.GetCustomAttributes(false);

@@ -24,8 +24,12 @@ using System.Reflection;
 
 namespace Gutenberg
 {
+    // Provides access to a source accessible by its URL; locally or from the Internet.
     public abstract class RemoteSource : LoggableBase
     {
+        // Returns a stream with the source content. If the URL is a file system path it just
+        // opens the file otherwise it downloads the content from the URL and returns a block
+        // of memory with it.
         public Stream Open() {
             if (Uri.IsWellFormedUriString(Url, UriKind.Absolute)) {
                 var output = new MemoryStream();
@@ -42,36 +46,54 @@ namespace Gutenberg
             return File.OpenRead(Url);
         }
 
+        // Copies the stream with the source content to the ouptut stream. It supports both file
+        // system paths and Internet URLs.
         public void Transfer(Stream output) {
-            Log.Verbose("Downloading {0}...", Url);
-            var client = CreateClient();
-            using (var input = client.OpenRead(Url)) {
-                string sizevalue = client.ResponseHeaders[HttpResponseHeader.ContentLength];
-                const int step = 65536;
-                Progress progress = null;
-                int count = 1;
-                if (!string.IsNullOrEmpty(sizevalue)) {
-                    int steps = int.Parse(sizevalue, CultureInfo.InvariantCulture) / step;
-                    progress = Log.Action(steps, "Downloading {0}...", Url);
-                }
-                for (var buffer = new byte[step]; ; ) {
-                    var length = input.Read(buffer, 0, buffer.Length);
-                    if (length <= 0)
-                        break;
-                    output.Write(buffer, 0, length);
-                    if (progress != null && count * step <= output.Length) {
-                        progress.Continue("{0} bytes transferred...", output.Length);
-                        ++count;
+            if (Uri.IsWellFormedUriString(Url, UriKind.Absolute)) {
+                Log.Verbose("Downloading {0}...", Url);
+                var client = CreateClient();
+                using (var input = client.OpenRead(Url)) {
+                    string sizevalue = client.ResponseHeaders[HttpResponseHeader.ContentLength];
+                    // The content is downloaded by blocks of 65,536 bytes. Reporting one step
+                    // for every block behaved well in the console progress bar on my laptop.
+                    const int step = 65536;
+                    Progress progress = null;
+                    int count = 1;
+                    // Content-Length might not be available; no progressbar would be available
+                    // in such case. Luckily, files in the Project Gutenberg support it.
+                    if (!string.IsNullOrEmpty(sizevalue)) {
+                        int steps = int.Parse(sizevalue, CultureInfo.InvariantCulture) / step;
+                        progress = Log.Action(steps, "Downloading {0}...", Url);
                     }
+                    for (var buffer = new byte[step]; ; ) {
+                        var length = input.Read(buffer, 0, buffer.Length);
+                        if (length <= 0)
+                            break;
+                        output.Write(buffer, 0, length);
+                        // The specified block size is more of a recommendation; the method can
+                        // perform a step of a smaller size; let's detect the expected step size.
+                        if (progress != null && count * step <= output.Length) {
+                            progress.Continue("{0} bytes transferred...", output.Length);
+                            ++count;
+                        }
+                    }
+                    Log.Verbose("{0} bytes were transferred.", sizevalue);
+                    if (progress != null)
+                        progress.Finish();
                 }
-                Log.Verbose("{0} bytes were transferred.", sizevalue);
-                if (progress != null)
-                    progress.Finish();
+            } else {
+                Log.Verbose("Copying {0}...", Url);
+                using (var input = File.OpenRead(Url))
+                    input.CopyTo(output);
             }
         }
 
+        // Creates the client to download from Internet URLs. It sets a couple of headers to
+        // describe the agent and its capabilities.
         WebClient CreateClient() {
             var client = new WebClient();
+            // Without sending the set of headers as similar to the real browser as possible I was
+            // getting HTTP error 403 when downloading files from http://www.gutenberg.org/cache.
             client.Headers[HttpRequestHeader.Accept] = "text/plain,text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
             // Accept-Encoding: gzip,deflate,sdch
             client.Headers[HttpRequestHeader.AcceptCharset] = "ISO-8859-2,utf-8;q=0.7,*;q=0.3";
@@ -89,18 +111,22 @@ namespace Gutenberg
             return client;
         }
 
+        // URL of the source to download from; to be implemented by decended classes.
         protected abstract string Url { get; }
     }
 
+    // Offers downloading of a source with a URL specified in the constructor.
     public class Downloader : RemoteSource
     {
+        // Creates a new instance that will download from the specified URL.
         public Downloader(string url) {
             this.url = url;
         }
 
+        // URL of the source to download from specified in the constructor.
         protected override string Url {
             get { return url; }
         }
-        string url;
+        readonly string url;
     }
 }

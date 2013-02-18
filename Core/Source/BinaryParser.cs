@@ -22,8 +22,11 @@ using System.Text;
 
 namespace Gutenberg
 {
+    // Serves as a base class for files which contain serialized structures and need recognition
+    // by the format name and version.
     public abstract class BinaryParser : LoggableBase
     {
+        // Opens the binary content, reading and checking the format name and version.
         protected BinaryReader Open(Stream stream) {
             BinaryReader reader = new BinaryReader(stream, Encoding.UTF8);
             Log.Verbose("Checking content...");
@@ -39,6 +42,8 @@ namespace Gutenberg
             }
         }
 
+        // Starts creating a new binary content in the entered stream, writing the format name
+        // and version to it. the stream is supposed to be at the position zero.
         protected BinaryWriter Create(Stream stream) {
             BinaryWriter writer = new BinaryWriter(stream, Encoding.UTF8);
             try {
@@ -51,8 +56,11 @@ namespace Gutenberg
             }
         }
 
+        // The name of the content format used as a file header.
         protected abstract string Header { get; }
 
+        // The version of the content format. The specified version and versios less than it will
+        // be allowed to open.
         protected abstract int Version { get; }
     }
 }

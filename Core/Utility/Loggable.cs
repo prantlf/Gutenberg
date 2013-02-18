@@ -18,13 +18,21 @@
 
 namespace Gutenberg
 {
+    // Declares that the implementing class supports logging and if you wish it, you should set
+    // a Log instance for it before you use it.
     public interface Loggable
     {
+        // Returns the Log instance to use. It never returns null to allow safe usage.
         Log Log { get; set; }
     }
 
+    // The minimum convenience base class for objects which need logging.
     public abstract class LoggableBase : Loggable
     {
+        // Returns the Log instance to use. If it has not been explicitly set it will return
+        // a dummy object doing no logging to allow safe usage - unless DebugLog is set to true
+        // in the application settings; the logger writing to the Windows debugging output is
+        // returned in such case.
         public Log Log {
             get {
                 return log ?? (log = Settings.GetValue<bool>(typeof(Loggable), "DebugLog") ?
@@ -37,10 +45,14 @@ namespace Gutenberg
         }
         Log log;
 
+        // Checks if a Log instance has been explicitly set for this object.
         protected bool HasLog {
             get { return log != null; }
         }
 
+        // If someone set Log on this object it should be the same for all objects owned by it.
+        // This method should be overriden by descendant classes and it should propagate the Log
+		// instance to all owned Loggable objects.
         protected virtual void UpdateLog() {}
     }
 }

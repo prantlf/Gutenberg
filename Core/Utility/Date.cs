@@ -27,6 +27,9 @@ using System.Xml.Serialization;
 
 namespace Gutenberg
 {
+    // .NET still doesn't provide a strcture for date-only values. It is a pain to tale care
+    // of the unused time part in computing and rendering operations. This class makes the life
+    // with dates easier. To keep the code shorter, it is based on DateTime internally.
     [Serializable]
     public struct Date : IFormattable, ISerializable, IComparable, IConvertible,
                          IComparable<Date>, IEquatable<Date>, IXmlSerializable
@@ -85,8 +88,12 @@ namespace Gutenberg
             return time.ToString(NormalizeFormat(format), formatProvider);
         }
 
+        // Only some formating strings are accepted which make sense for dates without time part.
+        // If a format is entered which would render also the time part it will be ignored and
+        // the default "d" will be returned.
         static string NormalizeFormat(string format) {
             if (format != null) {
+                // The shomewhat shortened ISO format.
                 if (format == "u" || format == "s")
                     format = "yyyy-MM-dd";
                 else
@@ -96,6 +103,7 @@ namespace Gutenberg
                             ++i;
                             continue;
                         }
+                        // You shouldn't go too much crazy with your formatting strings...
                         if (!"dMy:/- ".Contains(c)) {
                             format = "d";
                             break;
@@ -167,6 +175,8 @@ namespace Gutenberg
 
         [SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
         void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context) {
+            // Adding the ticks as long might be more effective but let's believe that the
+            // date/time is actually handled this way internally...
             info.AddValue("date", time);
         }
 

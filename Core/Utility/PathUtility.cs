@@ -59,7 +59,7 @@ namespace Gutenberg
             var trimmed = parts.Skip(start).Take(count).Select(item => item.Trim());
             foreach (var part in trimmed.Where(item => item.Any()))
                 // This seems complicated but the idea is to ensure the single separating slashes
-                // saving the append slash operation if not necessary.
+                // saving the slash appending operation if not necessary.
                 if (part.StartsWith('/')) {
                     if (result.Length > 0 && !result.EndsWith('/'))
                         result.Append(part);
@@ -77,7 +77,6 @@ namespace Gutenberg
         // If there is no slash in the path it is already the child name. The parent is the part
         // from the beginning up to the very last slash. If there is no slash in the path the
         // parent is empty because the path contains only the child then.
-
         public static string GetChildName(string path) {
             if (path == null)
                 throw new ArgumentNullException("path");
